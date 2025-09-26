@@ -29,8 +29,8 @@ export function Header() {
             <Button variant="ghost" className="hidden md:inline-flex">
               Sign In
             </Button>
-            <Button variant="hero" className="glow">
-              Start Free Trial
+            <Button variant="hero" className="glow" asChild>
+              <a href="#pricing">Start Free Trial</a>
             </Button>
           </div>
         </div>

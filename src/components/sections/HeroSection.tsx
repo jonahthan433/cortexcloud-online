@@ -37,9 +37,11 @@ export function HeroSection() {
                 placeholder="Enter your business email"
                 className="min-w-[300px] bg-transparent border-0 focus-visible:ring-0 text-foreground placeholder:text-muted-foreground"
               />
-              <Button variant="hero" size="lg" className="flex items-center space-x-2">
-                <span>Start Free</span>
-                <ArrowRight className="h-4 w-4" />
+              <Button variant="hero" size="lg" className="flex items-center space-x-2" asChild>
+                <a href="#pricing">
+                  <span>Start Free</span>
+                  <ArrowRight className="h-4 w-4" />
+                </a>
               </Button>
             </div>
           </div>
