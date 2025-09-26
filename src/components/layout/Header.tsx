@@ -20,7 +20,7 @@ export function Header() {
                 Pricing
               </a>
               <a href="#contact" className="text-muted-foreground hover:text-primary transition-colors">
-                Contact
+                Book a Call
               </a>
             </div>
           </div>
