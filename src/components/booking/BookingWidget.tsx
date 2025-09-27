@@ -140,7 +140,7 @@ export const BookingWidget = () => {
       }
 
       // Create booking
-      const { error: bookingError } = await supabase
+      const { data: bookingData, error: bookingError } = await supabase
         .from('bookings')
         .insert({
           name: formData.name,
@@ -151,9 +151,34 @@ export const BookingWidget = () => {
           duration_minutes: 30,
           notes: formData.notes,
           status: 'confirmed'
-        });
+        })
+        .select()
+        .single();
 
       if (bookingError) throw bookingError;
+
+      // Send confirmation emails
+      try {
+        const { error: emailError } = await supabase.functions.invoke('send-booking-confirmation', {
+          body: {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            booking_date: format(selectedDate, 'yyyy-MM-dd'),
+            booking_time: selectedTime,
+            notes: formData.notes,
+            booking_id: bookingData.id
+          }
+        });
+
+        if (emailError) {
+          console.error('Email sending failed:', emailError);
+          // Don't fail the booking if email fails
+        }
+      } catch (emailError) {
+        console.error('Email sending failed:', emailError);
+        // Don't fail the booking if email fails
+      }
 
       toast({
         title: "Booking Confirmed!",
