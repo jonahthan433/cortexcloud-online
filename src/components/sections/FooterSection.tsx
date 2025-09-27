@@ -13,6 +13,9 @@ export function FooterSection() {
               src={cortexLogo} 
               alt="CortexCloud" 
               className="h-12 w-auto brightness-110 contrast-110"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
             />
             <p className="text-muted-foreground max-w-xs">
               Transform your business with AI-powered automation and intelligent workflows.
