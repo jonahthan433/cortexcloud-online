@@ -11,6 +11,8 @@ export function Header() {
               src={cortexLogo} 
               alt="CortexCloud" 
               className="h-10 w-auto brightness-110 contrast-110"
+              decoding="async"
+              fetchPriority="high"
             />
             <div className="hidden md:flex items-center space-x-8 ml-8">
               <a href="#features" className="text-muted-foreground hover:text-primary transition-colors">
