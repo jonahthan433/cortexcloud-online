@@ -128,6 +128,66 @@ export type Database = {
           }
           Relationships: []
         }
+        consultation_requests: {
+          Row: {
+            id: string
+            name: string
+            email: string
+            phone: string | null
+            role: string | null
+            experience: string | null
+            goal: string | null
+            success: string | null
+            challenge: string | null
+            time_commitment: string | null
+            readiness: string | null
+            budget: string | null
+            start_time: string | null
+            why_right: string | null
+            status: string
+            created_at: string | null
+            updated_at: string | null
+          }
+          Insert: {
+            id?: string
+            name: string
+            email: string
+            phone?: string | null
+            role?: string | null
+            experience?: string | null
+            goal?: string | null
+            success?: string | null
+            challenge?: string | null
+            time_commitment?: string | null
+            readiness?: string | null
+            budget?: string | null
+            start_time?: string | null
+            why_right?: string | null
+            status?: string
+            created_at?: string | null
+            updated_at?: string | null
+          }
+          Update: {
+            id?: string
+            name?: string
+            email?: string
+            phone?: string | null
+            role?: string | null
+            experience?: string | null
+            goal?: string | null
+            success?: string | null
+            challenge?: string | null
+            time_commitment?: string | null
+            readiness?: string | null
+            budget?: string | null
+            start_time?: string | null
+            why_right?: string | null
+            status?: string
+            created_at?: string | null
+            updated_at?: string | null
+          }
+          Relationships: []
+        }
       availability: {
         Row: {
           created_at: string | null

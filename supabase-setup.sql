@@ -73,6 +73,27 @@ CREATE TABLE IF NOT EXISTS email_leads (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Create consultation_requests table
+CREATE TABLE IF NOT EXISTS consultation_requests (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(50),
+    role VARCHAR(255),
+    experience VARCHAR(255),
+    goal VARCHAR(255),
+    success VARCHAR(255),
+    challenge VARCHAR(255),
+    time_commitment VARCHAR(255),
+    readiness VARCHAR(255),
+    budget VARCHAR(255),
+    start_time VARCHAR(255),
+    why_right VARCHAR(255),
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create function to check booking conflicts
 CREATE OR REPLACE FUNCTION check_booking_conflict(
     p_booking_date DATE,
@@ -141,6 +162,10 @@ CREATE TRIGGER update_activation_tokens_updated_at
     BEFORE UPDATE ON activation_tokens
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_consultation_requests_updated_at
+    BEFORE UPDATE ON consultation_requests
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- Insert default availability (Monday to Friday, 9 AM to 5 PM)
 INSERT INTO availability (day_of_week, start_time, end_time, is_available) VALUES
 (1, '09:00', '17:00', true),  -- Monday
@@ -164,6 +189,7 @@ ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE email_leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE activation_tokens ENABLE ROW LEVEL SECURITY;
+ALTER TABLE consultation_requests ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for public access
 CREATE POLICY "Allow public read access to availability" ON availability
@@ -213,6 +239,12 @@ CREATE POLICY "Allow public update activation_tokens" ON activation_tokens
     FOR UPDATE USING (true);
 
 CREATE POLICY "Allow admin full access to activation_tokens" ON activation_tokens
+    FOR ALL USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Allow public insert to consultation_requests" ON consultation_requests
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow admin full access to consultation_requests" ON consultation_requests
     FOR ALL USING (auth.role() = 'authenticated');
 
 -- Create a function to send booking confirmation email (placeholder)

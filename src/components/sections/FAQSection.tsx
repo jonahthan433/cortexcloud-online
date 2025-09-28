@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Link } from "react-router-dom";
 
 const faqs = [
   {
@@ -89,9 +90,12 @@ export const FAQSection = () => {
             <button className="px-6 py-3 bg-gradient-primary text-white rounded-lg font-medium hover:opacity-90 transition-opacity">
               Contact Support
             </button>
-            <button className="px-6 py-3 border border-cortex-cyan/30 text-cortex-cyan rounded-lg font-medium hover:bg-cortex-cyan/10 transition-colors">
+            <Link 
+              to="/ai-mentorship" 
+              className="px-6 py-3 border border-cortex-cyan/30 text-cortex-cyan rounded-lg font-medium hover:bg-cortex-cyan/10 transition-colors inline-block text-center"
+            >
               Schedule Demo
-            </button>
+            </Link>
           </div>
         </div>
       </div>
