@@ -29,9 +29,9 @@ export function Header() {
               <a href="#pricing" className="text-muted-foreground hover:text-primary transition-colors">
                 Pricing
               </a>
-              <Link to="/booking" className="text-muted-foreground hover:text-primary transition-colors">
-                Book a Call
-              </Link>
+                  <Link to="/ai-mentorship" className="text-muted-foreground hover:text-primary transition-colors">
+                    Schedule Demo
+                  </Link>
                   {user && (
                     <Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors">
                       Dashboard

@@ -1,5 +1,7 @@
-import { Sparkles, Zap, Globe } from "lucide-react";
+import { Sparkles, Zap, Globe, Calendar } from "lucide-react";
 import { EmailCapture } from "@/components/EmailCapture";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export function HeroSection() {
   return (
@@ -33,6 +35,12 @@ export function HeroSection() {
           {/* CTA Section */}
           <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mb-16">
             <EmailCapture />
+            <Button variant="outline" size="lg" asChild>
+              <Link to="/ai-mentorship">
+                <Calendar className="h-5 w-5 mr-2" />
+                Schedule Demo
+              </Link>
+            </Button>
           </div>
 
           {/* Feature Pills */}

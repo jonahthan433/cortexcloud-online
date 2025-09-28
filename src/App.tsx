@@ -14,6 +14,7 @@ import Register from "./pages/Register";
 import Checkout from "./pages/Checkout";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import Test from "./pages/Test";
+import AIMentorship from "./pages/AIMentorship";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/checkout/success" element={<CheckoutSuccess />} />
                 <Route path="/test" element={<Test />} />
+                <Route path="/ai-mentorship" element={<AIMentorship />} />
                 <Route
                   path="/dashboard"
                   element={
