@@ -19,35 +19,23 @@ const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Test Google Auth configuration on component mount
+  // Check if Supabase is properly configured
   useEffect(() => {
-    const testGoogleAuth = async () => {
-      try {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: `${window.location.origin}/dashboard`,
-          },
-        });
-        
-        if (error) {
-          console.error('Google OAuth not configured:', error);
-          toast({
-            title: "Google Sign-In Not Available",
-            description: "Google authentication is not properly configured. Please use email/password.",
-            variant: "destructive"
-          });
-        } else {
-          setGoogleAuthReady(true);
-          console.log('✅ Google OAuth is properly configured');
-        }
-      } catch (error) {
-        console.error('Error testing Google auth:', error);
+    const checkSupabaseConfig = () => {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      
+      if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
+        console.warn('Supabase not configured, disabling Google OAuth');
+        setGoogleAuthReady(false);
+      } else {
+        console.log('✅ Supabase is properly configured');
+        setGoogleAuthReady(true);
       }
     };
 
-    testGoogleAuth();
-  }, [toast]);
+    checkSupabaseConfig();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +44,15 @@ const Login = () => {
       toast({
         title: "Error",
         description: "Please fill in all fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!googleAuthReady) {
+      toast({
+        title: "Authentication Unavailable",
+        description: "Authentication service is not properly configured. Please contact support.",
         variant: "destructive"
       });
       return;
@@ -80,6 +77,7 @@ const Login = () => {
         });
       }
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -91,6 +89,15 @@ const Login = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!googleAuthReady) {
+      toast({
+        title: "Google Sign-In Unavailable",
+        description: "Google authentication is not properly configured. Please use email/password.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     
     try {
@@ -114,6 +121,7 @@ const Login = () => {
         });
       }
     } catch (error) {
+      console.error('Google sign-in error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
