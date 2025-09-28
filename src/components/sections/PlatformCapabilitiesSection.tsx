@@ -95,25 +95,6 @@ export const PlatformCapabilitiesSection = () => {
           ))}
         </div>
 
-        <div className="mt-16 text-center">
-          <div className="bg-gradient-card rounded-2xl p-8 border border-cortex-cyan/20">
-            <h3 className="text-2xl font-bold mb-4 text-foreground">
-              Ready to Transform Your Business?
-            </h3>
-            <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Join thousands of businesses already using CortexCloud to automate their growth, 
-              streamline operations, and scale faster than ever before.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-gradient-primary text-white border-0" asChild>
-                <a href="#pricing">Get Started Free</a>
-              </Button>
-              <Button variant="outline" size="lg">
-                Schedule Demo
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
