@@ -172,23 +172,8 @@ const Checkout = () => {
         throw userError;
       }
 
-      // Create user record for trial
-      const { data: trialUser, error: trialError } = await supabase
-        .from('users')
-        .upsert({
-          email: formData.email,
-          name: formData.fullName,
-          company: formData.company,
-          trial_started: true,
-          trial_expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-          plan: selectedPlan.name.toLowerCase()
-        })
-        .select()
-        .single();
-
-      if (trialError) {
-        console.error('Error creating trial user:', trialError);
-      }
+      // Note: User trials are tracked via email_leads table for now
+      console.log('Trial started for:', formData.email);
 
       // Send activation email
       const emailResult = await EmailService.sendActivationEmail(
