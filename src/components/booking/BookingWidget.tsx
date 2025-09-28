@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, addDays, subDays } from "date-fns";
+import { calendarIntegration, getCalendarConfig } from "@/services/calendarIntegration";
 
 interface Availability {
   id: string;
@@ -28,6 +29,9 @@ export const BookingWidget = () => {
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [availability, setAvailability] = useState<Availability[]>([]);
   const [loading, setLoading] = useState(false);
+  const [calendarLoading, setCalendarLoading] = useState(false);
+  const [calendarConnected, setCalendarConnected] = useState(false);
+  const [unavailableDates, setUnavailableDates] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -38,7 +42,62 @@ export const BookingWidget = () => {
 
   useEffect(() => {
     fetchAvailability();
+    initializeCalendarIntegration();
   }, []);
+
+  // Initialize calendar integration
+  const initializeCalendarIntegration = async () => {
+    try {
+      const config = getCalendarConfig();
+      if (!config) {
+        console.log('No calendar configuration found');
+        return;
+      }
+
+      setCalendarLoading(true);
+      const success = await calendarIntegration.initialize(config);
+      
+      if (success) {
+        setCalendarConnected(true);
+        await syncCalendarEvents();
+        toast({
+          title: "Calendar Connected",
+          description: "Your personal calendar has been connected successfully.",
+        });
+      } else {
+        console.warn('Calendar integration failed');
+        toast({
+          title: "Calendar Connection Failed",
+          description: "Unable to connect to your personal calendar. You can still book appointments.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Calendar integration error:', error);
+      toast({
+        title: "Calendar Error",
+        description: "There was an error connecting to your calendar.",
+        variant: "destructive"
+      });
+    } finally {
+      setCalendarLoading(false);
+    }
+  };
+
+  // Sync calendar events to get unavailable dates
+  const syncCalendarEvents = async () => {
+    try {
+      const today = new Date();
+      const endDate = addDays(today, 90); // Sync next 90 days
+      
+      const unavailableDates = await calendarIntegration.getUnavailableDates(today, endDate);
+      setUnavailableDates(unavailableDates);
+      
+      console.log(`Synced ${unavailableDates.size} unavailable dates from calendar`);
+    } catch (error) {
+      console.error('Failed to sync calendar events:', error);
+    }
+  };
 
   useEffect(() => {
     if (selectedDate) {
@@ -205,6 +264,19 @@ export const BookingWidget = () => {
 
   const isDateAvailable = (date: Date) => {
     const dayOfWeek = date.getDay();
+    const dateStr = date.toISOString().split('T')[0];
+    
+    // Check if date is in the past
+    if (date < new Date()) {
+      return false;
+    }
+    
+    // Check if date is blocked by calendar events
+    if (unavailableDates.has(dateStr)) {
+      return false;
+    }
+    
+    // Check if date is available based on weekly schedule
     return availability.some(a => a.day_of_week === dayOfWeek && a.is_available);
   };
 
@@ -212,6 +284,34 @@ export const BookingWidget = () => {
     <Card className="w-full max-w-2xl mx-auto glass-effect border-primary/20">
       <CardHeader>
         <CardTitle className="gradient-text text-center text-2xl">Book Your Appointment</CardTitle>
+        
+        {/* Calendar Status */}
+        <div className="flex items-center justify-center space-x-2 mt-4">
+          {calendarLoading ? (
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+              <span>Connecting to calendar...</span>
+            </div>
+          ) : calendarConnected ? (
+            <div className="flex items-center space-x-2 text-sm text-green-600">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>Calendar connected</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={syncCalendarEvents}
+                className="text-xs"
+              >
+                Refresh
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <span>Calendar not connected</span>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
