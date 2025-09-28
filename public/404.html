@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CortexCloud - Redirecting...</title>
+    <script>
+        // GitHub Pages 404 handler for client-side routing
+        // This script takes the current URL and redirects to index.html with the path as a query parameter
+        // The React Router will then handle the routing client-side
+        
+        var pathSegmentsToKeep = 0;
+        
+        var l = window.location;
+        l.replace(
+            l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+            l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+            l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+            (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+            l.hash
+        );
+    </script>
+</head>
+<body>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
+        <div style="text-align: center;">
+            <h2>Redirecting to CortexCloud...</h2>
+            <p>If you are not redirected automatically, <a href="/">click here</a>.</p>
+        </div>
+    </div>
+</body>
+</html>
