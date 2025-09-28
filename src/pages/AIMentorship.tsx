@@ -28,10 +28,7 @@ const AIMentorship = () => {
     email: '',
     company: '',
     phone: '',
-    goals: '',
-    experience: '',
-    preferredTime: '',
-    budget: ''
+    message: ''
   });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -59,10 +56,7 @@ const AIMentorship = () => {
         email: '',
         company: '',
         phone: '',
-        goals: '',
-        experience: '',
-        preferredTime: '',
-        budget: ''
+        message: ''
       });
     } catch (error) {
       toast({
@@ -428,96 +422,62 @@ const AIMentorship = () => {
               </p>
             </div>
 
-            <Card className="glass-effect border-primary/20">
+            <Card className="glass-effect border-primary/20 max-w-2xl mx-auto">
               <CardContent className="p-8">
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name *</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
-                        placeholder="John Doe"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        placeholder="john@company.com"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="company">Company Name *</Label>
-                      <Input
-                        id="company"
-                        value={formData.company}
-                        onChange={(e) => handleInputChange('company', e.target.value)}
-                        placeholder="Your Company"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => handleInputChange('phone', e.target.value)}
-                        placeholder="+1 (555) 123-4567"
-                      />
-                    </div>
-                  </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="goals">What are your main business goals with AI? *</Label>
+                    <Label htmlFor="name">Name *</Label>
                     <Input
-                      id="goals"
-                      value={formData.goals}
-                      onChange={(e) => handleInputChange('goals', e.target.value)}
-                      placeholder="e.g., Automate customer service, improve data analysis, reduce operational costs"
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      placeholder="Your full name"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="experience">What's your current experience with AI?</Label>
+                    <Label htmlFor="email">Email *</Label>
                     <Input
-                      id="experience"
-                      value={formData.experience}
-                      onChange={(e) => handleInputChange('experience', e.target.value)}
-                      placeholder="e.g., Beginner, Some experience, Advanced"
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      placeholder="your@email.com"
+                      required
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="preferredTime">Preferred Demo Time</Label>
-                      <Input
-                        id="preferredTime"
-                        value={formData.preferredTime}
-                        onChange={(e) => handleInputChange('preferredTime', e.target.value)}
-                        placeholder="e.g., Weekdays 9-5 PM EST"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="budget">Budget Range</Label>
-                      <Input
-                        id="budget"
-                        value={formData.budget}
-                        onChange={(e) => handleInputChange('budget', e.target.value)}
-                        placeholder="e.g., $5,000 - $10,000"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="company">Company</Label>
+                    <Input
+                      id="company"
+                      value={formData.company}
+                      onChange={(e) => handleInputChange('company', e.target.value)}
+                      placeholder="Your company name"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      placeholder="Your phone number"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="message">Tell us about your AI goals</Label>
+                    <textarea
+                      id="message"
+                      value={formData.message}
+                      onChange={(e) => handleInputChange('message', e.target.value)}
+                      placeholder="What would you like to achieve with AI? What challenges are you facing?"
+                      className="w-full min-h-[100px] px-3 py-2 border border-input bg-background rounded-md text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    />
                   </div>
 
                   <Button
@@ -534,14 +494,13 @@ const AIMentorship = () => {
                     ) : (
                       <>
                         <Calendar className="h-5 w-5 mr-2" />
-                        Schedule My Demo
-                        <ArrowRight className="h-5 w-5 ml-2" />
+                        Schedule Demo
                       </>
                     )}
                   </Button>
 
                   <p className="text-sm text-muted-foreground text-center">
-                    We'll contact you within 24 hours to schedule your personalized AI strategy session.
+                    We'll get back to you within 24 hours to schedule your AI mentorship session.
                   </p>
                 </form>
               </CardContent>
