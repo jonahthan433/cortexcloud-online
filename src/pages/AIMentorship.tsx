@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import cortexLogo from '@/assets/cortex-logo.jpg';
 
 const AIMentorship = () => {
   const [formData, setFormData] = useState({
@@ -298,7 +299,7 @@ const AIMentorship = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 sm:space-x-4">
               <img 
-                src="/src/assets/cortex-logo.jpg" 
+                src={cortexLogo} 
                 alt="CortexCloud" 
                 className="h-8 sm:h-10 w-auto brightness-110 contrast-110"
               />
