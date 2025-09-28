@@ -9,6 +9,7 @@ import { Check, CreditCard, Shield, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { EmailService } from '@/services/emailService';
+import cortexLogo from '@/assets/cortex-logo.jpg';
 
 interface Plan {
   name: string;
@@ -252,7 +253,7 @@ const Checkout = () => {
             <div className="flex items-center space-x-4">
               <Link to="/" className="flex items-center space-x-2">
                 <img 
-                  src="/src/assets/cortex-logo.jpg" 
+                  src={cortexLogo} 
                   alt="CortexCloud" 
                   className="h-10 w-auto brightness-110 contrast-110"
                 />
