@@ -13,8 +13,44 @@ export type Database = {
     PostgrestVersion: "13.0.5"
   }
   public: {
-    Tables: {
-      admin_users: {
+        Tables: {
+          users: {
+            Row: {
+              company: string | null
+              created_at: string | null
+              email: string
+              id: string
+              name: string | null
+              plan: string
+              trial_expires_at: string | null
+              trial_started: boolean
+              updated_at: string | null
+            }
+            Insert: {
+              company?: string | null
+              created_at?: string | null
+              email: string
+              id: string
+              name?: string | null
+              plan?: string
+              trial_expires_at?: string | null
+              trial_started?: boolean
+              updated_at?: string | null
+            }
+            Update: {
+              company?: string | null
+              created_at?: string | null
+              email?: string
+              id?: string
+              name?: string | null
+              plan?: string
+              trial_expires_at?: string | null
+              trial_started?: boolean
+              updated_at?: string | null
+            }
+            Relationships: []
+          }
+          admin_users: {
         Row: {
           created_at: string | null
           email: string
@@ -38,6 +74,60 @@ export type Database = {
         }
         Relationships: []
       }
+        email_leads: {
+          Row: {
+            created_at: string | null
+            email: string
+            id: string
+            source: string
+            status: string
+            updated_at: string | null
+          }
+          Insert: {
+            created_at?: string | null
+            email: string
+            id?: string
+            source?: string
+            status?: string
+            updated_at?: string | null
+          }
+          Update: {
+            created_at?: string | null
+            email?: string
+            id?: string
+            source?: string
+            status?: string
+            updated_at?: string | null
+          }
+          Relationships: []
+        }
+        activation_tokens: {
+          Row: {
+            created_at: string | null
+            email: string
+            expires_at: string
+            id: string
+            token: string
+            used: boolean
+          }
+          Insert: {
+            created_at?: string | null
+            email: string
+            expires_at: string
+            id?: string
+            token: string
+            used?: boolean
+          }
+          Update: {
+            created_at?: string | null
+            email?: string
+            expires_at?: string
+            id?: string
+            token?: string
+            used?: boolean
+          }
+          Relationships: []
+        }
       availability: {
         Row: {
           created_at: string | null

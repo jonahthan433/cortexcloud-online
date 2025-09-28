@@ -3,28 +3,28 @@ import { Star } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Sarah Chen",
+    name: "Emma J.",
+    role: "Retail Business Owner",
+    company: "Local Retail Store",
+    content: "As a small business owner, I was drowning in admin work until I started using this software. It streamlined my operations so seamlessly that I now have more time to focus on growth. It's a game-changer for efficiency!",
+    rating: 5,
+    avatar: "EJ"
+  },
+  {
+    name: "Michael Chen",
     role: "Marketing Director",
     company: "TechStart Inc",
-    content: "CortexCloud transformed our lead generation process. We've seen a 300% increase in qualified leads and our sales team is finally organized.",
+    content: "The automation workflows and CRM integration have transformed our lead generation process. We've seen a 300% increase in qualified leads and our sales team is finally organized.",
     rating: 5,
-    avatar: "SC"
+    avatar: "MC"
   },
   {
-    name: "Marcus Rodriguez",
+    name: "Sarah Rodriguez",
     role: "Business Owner",
     company: "Digital Solutions Co",
-    content: "The automation workflows saved us 20+ hours per week. The WhatsApp integration alone has revolutionized how we communicate with clients.",
+    content: "The WhatsApp integration and social media scheduler alone have revolutionized how we communicate with clients. The 24/7 automation saves us 20+ hours per week.",
     rating: 5,
-    avatar: "MR"
-  },
-  {
-    name: "Emily Watson",
-    role: "Sales Manager",
-    company: "Growth Agency",
-    content: "Best investment we've made. The pipeline management and automated follow-ups have doubled our conversion rate in just 3 months.",
-    rating: 5,
-    avatar: "EW"
+    avatar: "SR"
   }
 ];
 

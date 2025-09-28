@@ -8,64 +8,90 @@ import {
   BarChart3,
   Zap,
   Globe,
-  Brain
+  Brain,
+  Monitor,
+  BookOpen,
+  Share2,
+  Smartphone,
+  Search,
+  Crown,
+  Settings,
+  Target
 } from "lucide-react";
 
 export function FeaturesSection() {
   const features = [
     {
       icon: Users,
-      title: "Smart CRM",
-      description: "Advanced contact management with AI-powered insights and drag-and-drop pipeline stages.",
+      title: "CRM & Pipeline",
+      description: "Secure and organized client data with automated lead tracking and drag-and-drop pipeline management.",
       color: "text-cyan-400"
     },
     {
       icon: Workflow,
-      title: "Automation Engine",
-      description: "Create powerful workflows with triggers, actions, and conditional logic to automate your business.",
+      title: "Automation Builder",
+      description: "Create powerful 24/7 marketing workflows to convert prospects into clients automatically.",
       color: "text-purple-400"
     },
     {
       icon: MessageSquare,
-      title: "Unified Communications",
-      description: "Manage email, WhatsApp, SMS, and social media messages from a single intelligent inbox.",
+      title: "All-In-One Conversations",
+      description: "Manage communications across email, WhatsApp, social media DMs, and Slack from a single dashboard.",
       color: "text-blue-400"
     },
     {
-      icon: Calendar,
-      title: "Smart Scheduling",
-      description: "Seamless appointment booking with Google Calendar integration and automated reminders.",
+      icon: Monitor,
+      title: "Website Builder",
+      description: "Build professional websites with drag-and-drop functionality and mobile-responsive design.",
       color: "text-green-400"
     },
     {
-      icon: CreditCard,
-      title: "Payment Processing",
-      description: "Accept payments effortlessly with Stripe and PayPal integration built right in.",
+      icon: BookOpen,
+      title: "Course Builder",
+      description: "Create and sell online courses with integrated payment processing and student management.",
       color: "text-yellow-400"
     },
     {
-      icon: BarChart3,
-      title: "Advanced Analytics",
-      description: "Real-time insights into leads, conversions, revenue, and business performance metrics.",
+      icon: Calendar,
+      title: "Calendar Management",
+      description: "Seamless appointment booking with Google Calendar integration and automated reminders.",
       color: "text-pink-400"
     },
     {
-      icon: Brain,
-      title: "AI Assistant",
-      description: "Intelligent recommendations and automated decision-making to optimize your workflows.",
+      icon: Share2,
+      title: "Social Media Scheduler",
+      description: "Automate content scheduling across all platforms to grow your audience consistently.",
       color: "text-indigo-400"
     },
     {
-      icon: Globe,
-      title: "Global Integration",
-      description: "Connect with 1000+ apps and services to create a unified business ecosystem.",
+      icon: Smartphone,
+      title: "WhatsApp & Slack Integration",
+      description: "Connect with customers through their preferred communication channels seamlessly.",
       color: "text-teal-400"
     },
     {
-      icon: Zap,
-      title: "Lightning Fast",
-      description: "Built for speed and scalability with enterprise-grade performance and reliability.",
+      icon: Search,
+      title: "Automatic SEO Optimization",
+      description: "Built-in SEO tools to improve your website's search engine rankings automatically.",
       color: "text-orange-400"
+    },
+    {
+      icon: Crown,
+      title: "Affiliate Program Management",
+      description: "Create and manage affiliate programs to scale your business through partnerships.",
+      color: "text-red-400"
+    },
+    {
+      icon: Settings,
+      title: "Memberships & Community",
+      description: "Build exclusive communities and membership sites with gated content and member management.",
+      color: "text-violet-400"
+    },
+    {
+      icon: Target,
+      title: "Lead Intake Automations",
+      description: "Automatically capture, qualify, and distribute leads to the right team members.",
+      color: "text-emerald-400"
     }
   ];
 

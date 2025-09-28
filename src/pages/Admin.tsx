@@ -1,4 +1,5 @@
 import { AvailabilityManager } from "@/components/admin/AvailabilityManager";
+import { BookingManager } from "@/components/admin/BookingManager";
 import { EmbedCode } from "@/components/booking/EmbedCode";
 
 const Admin = () => {
@@ -15,6 +16,7 @@ const Admin = () => {
         </div>
         
         <div className="space-y-8">
+          <BookingManager />
           <AvailabilityManager />
           <EmbedCode />
         </div>

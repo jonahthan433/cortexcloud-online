@@ -1,6 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowRight, Sparkles, Zap, Globe } from "lucide-react";
+import { Sparkles, Zap, Globe } from "lucide-react";
+import { EmailCapture } from "@/components/EmailCapture";
 
 export function HeroSection() {
   return (
@@ -26,24 +25,14 @@ export function HeroSection() {
           </p>
           
           <p className="text-lg text-muted-foreground/80 mb-12 max-w-2xl mx-auto">
-            Transform your business with intelligent automation, streamlined CRM, 
-            and unified communications. All powered by artificial intelligence.
+            Transform your business with 24/7 automation, comprehensive CRM, 
+            website building, course creation, and unified communications. 
+            Everything you need to scale your business.
           </p>
 
           {/* CTA Section */}
           <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mb-16">
-            <div className="flex items-center space-x-2 glass-effect p-1 rounded-lg border border-primary/20">
-              <Input
-                placeholder="Enter your business email"
-                className="min-w-[300px] bg-transparent border-0 focus-visible:ring-0 text-foreground placeholder:text-muted-foreground"
-              />
-              <Button variant="hero" size="lg" className="flex items-center space-x-2" asChild>
-                <a href="#pricing">
-                  <span>Start Free</span>
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-              </Button>
-            </div>
+            <EmailCapture />
           </div>
 
           {/* Feature Pills */}

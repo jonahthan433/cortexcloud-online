@@ -1,57 +1,71 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Star, Zap } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export function PricingSection() {
+  const [isYearly, setIsYearly] = useState(true);
+
   const plans = [
-    {
-      name: "Starter",
-      price: "$29",
-      period: "/month",
-      description: "Perfect for small businesses getting started",
+        {
+          name: "Initiate",
+          price: isYearly ? "$157" : "$197",
+          period: isYearly ? "/month" : "/month",
+          originalPrice: isYearly ? "$197" : null,
+          description: "Perfect for businesses getting started with automation",
       features: [
-        "Up to 1,000 contacts",
-        "5 automation workflows",
-        "Email integration",
-        "Basic analytics",
-        "24/7 support",
-        "1 user account"
+        "Business Setup & Integration",
+        "CRM & Pipeline Management",
+        "Website Builder",
+        "Course Builder",
+        "Automation Builder",
+        "All-In-One Conversations",
+        "Task Management",
+        "Calendar Management",
+        "24/7 Support"
       ],
       popular: false,
       ctaText: "Start Free Trial"
     },
-    {
-      name: "Professional",
-      price: "$79",
-      period: "/month",
-      description: "For growing businesses that need more power",
+        {
+          name: "Elevate",
+          price: isYearly ? "$237" : "$297",
+          period: isYearly ? "/month" : "/month",
+          originalPrice: isYearly ? "$297" : null,
+          description: "For growing businesses that need advanced features",
       features: [
-        "Up to 10,000 contacts",
-        "Unlimited automation workflows",
-        "Multi-channel communications",
-        "Advanced analytics",
-        "Calendar integration",
-        "Payment processing",
-        "Up to 5 user accounts",
-        "Priority support"
+        "Everything in Initiate",
+        "Unlimited Seats & Contacts",
+        "AI-Automation Integration",
+        "Lead Intake Automations",
+        "Sales & Marketing Automations",
+        "Website Integration & Hosting",
+        "WhatsApp & Slack Integration",
+        "Automatic SEO Optimization",
+        "Affiliate Program & Management",
+        "Memberships, Community & App Builder"
       ],
       popular: true,
       ctaText: "Start Free Trial"
     },
-    {
-      name: "Enterprise",
-      price: "$199",
-      period: "/month",
-      description: "For large organizations with advanced needs",
+        {
+          name: "Innovate",
+          price: "Custom",
+          period: "Pricing",
+          originalPrice: null,
+          description: "Done For You service with agency features",
       features: [
-        "Unlimited contacts",
-        "Advanced AI features",
-        "White-label options",
-        "Custom integrations",
-        "Dedicated account manager",
-        "Advanced security",
-        "Unlimited user accounts",
-        "Custom workflows"
+        "Everything in Elevate",
+        "Agency Automations",
+        "Agency Sales & Marketing Drips",
+        "Agency Lead Intake & Distribution",
+        "Agency Qualifying Forms & Surveys",
+        "Agency Calendar Setup",
+        "Access to Resellers License",
+        "Dedicated Account Manager",
+        "Custom Integrations",
+        "White-label Options"
       ],
       popular: false,
       ctaText: "Contact Sales"
@@ -61,14 +75,41 @@ export function PricingSection() {
   return (
     <section id="pricing" className="py-24 px-6">
       <div className="container mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            <span className="gradient-text">Simple Pricing</span>
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Choose the perfect plan for your business. All plans include a 14-day free trial.
-          </p>
-        </div>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-6xl font-bold mb-6">
+                <span className="gradient-text">Simple Pricing</span>
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+                Choose the perfect plan for your business. All plans include a 14-day free trial.
+              </p>
+              
+              {/* Pricing Toggle */}
+              <div className="flex items-center justify-center space-x-4 mb-8">
+                <span className={`text-sm font-medium transition-colors ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  Monthly
+                </span>
+                <button
+                  onClick={() => setIsYearly(!isYearly)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                    isYearly ? 'bg-primary' : 'bg-muted'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isYearly ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+                <div className="flex items-center space-x-2">
+                  <span className={`text-sm font-medium transition-colors ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    Yearly
+                  </span>
+                  <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full font-medium">
+                    Save 20%
+                  </span>
+                </div>
+              </div>
+            </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {plans.map((plan, index) => (
@@ -96,14 +137,28 @@ export function PricingSection() {
                 <CardDescription className="text-muted-foreground mb-6">
                   {plan.description}
                 </CardDescription>
-                <div className="flex items-center justify-center">
-                  <span className="text-5xl font-bold gradient-text">
-                    {plan.price}
-                  </span>
-                  <span className="text-muted-foreground ml-2">
-                    {plan.period}
-                  </span>
-                </div>
+                    <div className="flex items-center justify-center">
+                      <div className="text-center">
+                        {plan.originalPrice && (
+                          <div className="text-lg text-muted-foreground line-through mb-1">
+                            {plan.originalPrice}
+                          </div>
+                        )}
+                        <div className="flex items-center">
+                          <span className="text-5xl font-bold gradient-text">
+                            {plan.price}
+                          </span>
+                          <span className="text-muted-foreground ml-2">
+                            {plan.period}
+                          </span>
+                        </div>
+                        {plan.name !== "Innovate" && (
+                          <div className="text-sm text-primary font-medium mt-1">
+                            {isYearly ? "Billed annually" : "Billed monthly"}
+                          </div>
+                        )}
+                      </div>
+                    </div>
               </CardHeader>
               
               <CardContent className="space-y-6">
@@ -116,14 +171,28 @@ export function PricingSection() {
                   ))}
                 </ul>
                 
-                <Button 
-                  variant={plan.popular ? "hero" : "cyber"} 
-                  className="w-full mt-8"
-                  size="lg"
-                >
-                  <Zap className="h-4 w-4 mr-2" />
-                  {plan.ctaText}
-                </Button>
+                    {plan.name === "Innovate" ? (
+                      <Button
+                        variant={plan.popular ? "hero" : "cyber"}
+                        className="w-full mt-8"
+                        size="lg"
+                      >
+                        <Zap className="h-4 w-4 mr-2" />
+                        {plan.ctaText}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant={plan.popular ? "hero" : "cyber"}
+                        className="w-full mt-8"
+                        size="lg"
+                        asChild
+                      >
+                        <Link to={`/checkout?plan=${plan.name}&yearly=${isYearly}`}>
+                          <Zap className="h-4 w-4 mr-2" />
+                          {plan.ctaText}
+                        </Link>
+                      </Button>
+                    )}
               </CardContent>
             </Card>
           ))}

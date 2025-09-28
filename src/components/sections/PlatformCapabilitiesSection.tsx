@@ -72,8 +72,8 @@ export const PlatformCapabilitiesSection = () => {
             CortexCloud combines all essential business tools into one powerful platform. 
             From lead generation to customer management, automation to analytics – we've got you covered.
           </p>
-          <Button variant="secondary" size="lg" className="animate-pulse-glow">
-            Start Your Free Trial
+          <Button variant="secondary" size="lg" className="animate-pulse-glow" asChild>
+            <a href="#pricing">Start Your Free Trial</a>
           </Button>
         </div>
 
@@ -105,8 +105,8 @@ export const PlatformCapabilitiesSection = () => {
               streamline operations, and scale faster than ever before.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-gradient-primary text-white border-0">
-                Get Started Free
+              <Button size="lg" className="bg-gradient-primary text-white border-0" asChild>
+                <a href="#pricing">Get Started Free</a>
               </Button>
               <Button variant="outline" size="lg">
                 Schedule Demo
