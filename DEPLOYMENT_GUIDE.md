@@ -66,7 +66,7 @@ Created `env.example` with required environment variables.
 
 ## 🔗 Your Site URL:
 Once deployed, your site will be available at:
-`https://jonahthan433.github.io/cortexcloud-online`
+`https://cortexcloud.online`
 
 ## 📞 Need Help?
 If you're still experiencing issues:

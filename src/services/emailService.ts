@@ -19,7 +19,7 @@ export class EmailService {
   }
 
   private static generateActivationLink(token: string): string {
-    const baseUrl = import.meta.env.VITE_APP_URL || 'https://jonahthan433.github.io/cortexcloud-online';
+    const baseUrl = import.meta.env.VITE_APP_URL || 'https://cortexcloud.online';
     return `${baseUrl}/auth/register?token=${token}&activated=true`;
   }
 
