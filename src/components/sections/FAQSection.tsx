@@ -51,13 +51,13 @@ const faqs = [
 
 export const FAQSection = () => {
   return (
-    <section className="py-20 px-4 bg-gradient-card">
+    <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-gradient-card">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6 bg-gradient-primary bg-clip-text text-transparent leading-tight">
             Frequently Asked Questions
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
             Everything you need to know about CortexCloud. Can't find what you're looking for? 
             <span className="text-cortex-cyan hover:underline cursor-pointer ml-1">Contact our support team</span>.
           </p>

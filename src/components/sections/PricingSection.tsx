@@ -73,13 +73,13 @@ export function PricingSection() {
   ];
 
   return (
-    <section id="pricing" className="py-24 px-6">
+    <section id="pricing" className="py-12 sm:py-16 md:py-24 px-4 sm:px-6">
       <div className="container mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-6xl font-bold mb-6">
+            <div className="text-center mb-12 sm:mb-16">
+              <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
                 <span className="gradient-text">Simple Pricing</span>
               </h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+              <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-8 px-2">
                 Choose the perfect plan for your business. All plans include a 14-day free trial.
               </p>
               
@@ -111,7 +111,7 @@ export function PricingSection() {
               </div>
             </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
           {plans.map((plan, index) => (
             <Card 
               key={index}

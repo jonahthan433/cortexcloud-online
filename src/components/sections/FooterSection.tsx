@@ -4,9 +4,9 @@ import { Github, Twitter, Linkedin, Mail } from "lucide-react";
 
 export function FooterSection() {
   return (
-    <footer className="py-16 px-6 border-t border-primary/10">
+    <footer className="py-12 sm:py-16 px-4 sm:px-6 border-t border-primary/10">
       <div className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
           {/* Brand */}
           <div className="space-y-4">
             <img 
