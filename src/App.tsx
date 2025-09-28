@@ -15,6 +15,7 @@ import Checkout from "./pages/Checkout";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import Test from "./pages/Test";
 import AIMentorship from "./pages/AIMentorship";
+import Diagnostic from "./pages/Diagnostic";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
                 <Route path="/checkout/success" element={<CheckoutSuccess />} />
                 <Route path="/test" element={<Test />} />
                 <Route path="/ai-mentorship" element={<AIMentorship />} />
+                <Route path="/diagnostic" element={<Diagnostic />} />
                 <Route
                   path="/dashboard"
                   element={
