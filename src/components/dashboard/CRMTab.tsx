@@ -36,13 +36,6 @@ export const CRMTab = () => {
     });
   };
 
-  const filteredContacts = contacts.filter(contact => {
-    const matchesSearch = contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         contact.company.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = selectedStatus === "all" || contact.status.toLowerCase() === selectedStatus.toLowerCase();
-    return matchesSearch && matchesStatus;
-  });
   const contacts = [
     {
       id: 1,
@@ -89,6 +82,14 @@ export const CRMTab = () => {
       source: "Email Campaign"
     }
   ];
+
+  const filteredContacts = contacts.filter(contact => {
+    const matchesSearch = contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         contact.company.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = selectedStatus === "all" || contact.status.toLowerCase() === selectedStatus.toLowerCase();
+    return matchesSearch && matchesStatus;
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
