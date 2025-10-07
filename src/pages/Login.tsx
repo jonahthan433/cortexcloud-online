@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { googleApiService } from '@/services/googleApiService';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -15,26 +16,34 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleAuthReady, setGoogleAuthReady] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Check if Supabase is properly configured
+  // Check if Supabase and Google Auth are properly configured
   useEffect(() => {
-    const checkSupabaseConfig = () => {
+    const checkConfigurations = () => {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
       
       if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
-        console.warn('Supabase not configured, disabling Google OAuth');
+        console.warn('❌ Supabase not configured');
         setGoogleAuthReady(false);
-      } else {
-        console.log('✅ Supabase is properly configured');
-        setGoogleAuthReady(true);
+        return;
       }
+
+      if (!googleClientId || googleClientId.includes('placeholder')) {
+        console.warn('❌ Google OAuth not configured');
+        setGoogleAuthReady(false);
+        return;
+      }
+
+      console.log('✅ Supabase and Google Auth properly configured');
+      setGoogleAuthReady(true);
     };
 
-    checkSupabaseConfig();
+    checkConfigurations();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +101,7 @@ const Login = () => {
     if (!googleAuthReady) {
       toast({
         title: "Google Sign-In Unavailable",
-        description: "Google authentication is not properly configured. Please use email/password.",
+        description: "Google authentication is not properly configured. Please contact support.",
         variant: "destructive"
       });
       return;
@@ -101,17 +110,22 @@ const Login = () => {
     setLoading(true);
     
     try {
+      // Use Supabase OAuth integration with Google
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         }
       });
 
       if (error) {
         toast({
-          title: "Error",
-          description: error.message || "Google sign-in failed",
+          title: "Sign-In Failed",
+          description: error.message || "Unable to sign in with Google",
           variant: "destructive"
         });
       } else {
@@ -119,18 +133,20 @@ const Login = () => {
           title: "Redirecting...",
           description: "Please complete sign-in with Google",
         });
+        // The redirect will happen automatically
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Google sign-in error:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: error.message || "An unexpected error occurred during Google sign-in",
         variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-6">
@@ -256,6 +272,7 @@ const Login = () => {
               Back to Home
             </Link>
           </div>
+
         </CardContent>
       </Card>
     </div>

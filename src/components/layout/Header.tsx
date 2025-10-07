@@ -44,16 +44,10 @@ export function Header() {
                   Dashboard
                 </Link>
               )}
-              <Link to="/admin" className="text-muted-foreground hover:text-primary transition-colors">
-                Admin
-              </Link>
             </div>
           </div>
           
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <Button variant="ghost" className="hidden md:inline-flex" asChild>
-              <Link to="/admin">Admin</Link>
-            </Button>
             {user ? (
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-muted-foreground hidden md:inline">
@@ -120,13 +114,6 @@ export function Header() {
                   Dashboard
                 </Link>
               )}
-              <Link 
-                to="/admin" 
-                className="text-muted-foreground hover:text-primary transition-colors py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Admin
-              </Link>
               {!user && (
                 <Link 
                   to="/auth/login" 

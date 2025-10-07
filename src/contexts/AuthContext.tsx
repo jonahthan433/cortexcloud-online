@@ -39,6 +39,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check for development login first
+    if (import.meta.env.DEV && localStorage.getItem('dev-authenticated') === 'true') {
+      const devUser = JSON.parse(localStorage.getItem('dev-user') || '{}');
+      if (devUser.id) {
+        console.log('🛠️ Development login detected');
+        setUser(devUser);
+        setLoading(false);
+        return;
+      }
+    }
+
     // Check for existing session
     const checkSession = async () => {
       try {

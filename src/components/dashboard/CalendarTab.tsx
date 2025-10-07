@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
 import { 
   Plus, 
   Calendar as CalendarIcon, 
@@ -12,11 +13,17 @@ import {
   MapPin,
   CheckCircle,
   AlertCircle,
-  X
+  X,
+  RefreshCw,
+  Settings
 } from "lucide-react";
+import { googleApiService } from "@/services/googleApiService";
 
 export const CalendarTab = () => {
   const { toast } = useToast();
+  const [googleEvents, setGoogleEvents] = useState<any[]>([]);
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  const [syncingCalendar, setSyncingCalendar] = useState(false);
 
   const handleScheduleMeeting = () => {
     toast({
@@ -37,6 +44,50 @@ export const CalendarTab = () => {
       title: `Schedule ${action}`,
       description: `Opening ${action.toLowerCase()} scheduler...`,
     });
+  };
+
+  // Check Google Calendar integration status
+  useEffect(() => {
+    const checkGoogleCalendarStatus = async () => {
+      const status = googleApiService.getConfigurationStatus();
+      setIsGoogleConnected(status.googleCalendarConfigured);
+    };
+    
+    checkGoogleCalendarStatus();
+  }, []);
+
+  // Sync Google Calendar
+  const handleSyncGoogleCalendar = async () => {
+    if (!isGoogleConnected) {
+      toast({
+        title: "Google Calendar Not Configured",
+        description: "Please configure Google Calendar API in your environment settings.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSyncingCalendar(true);
+    try {
+      const now = new Date();
+      const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // Next 30 days
+      
+      const events = await googleApiService.getCalendarEvents(now, endDate);
+      setGoogleEvents(events);
+      
+      toast({
+        title: "Calendar Synced",
+        description: `Found ${events.length} events in Google Calendar`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Failed to sync Google Calendar",
+        variant: "destructive"
+      });
+    } finally {
+      setSyncingCalendar(false);
+    }
   };
   const upcomingEvents = [
     {
@@ -124,11 +175,52 @@ export const CalendarTab = () => {
           <h2 className="text-2xl font-bold text-foreground">Calendar Management</h2>
           <p className="text-muted-foreground">Schedule and manage your appointments</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90" onClick={handleScheduleMeeting}>
-          <Plus className="h-4 w-4 mr-2" />
-          Schedule Meeting
-        </Button>
+        <div className="flex items-center gap-2">
+          {isGoogleConnected && (
+            <Button 
+              variant="outline" 
+              onClick={handleSyncGoogleCalendar}
+              disabled={syncingCalendar}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${syncingCalendar ? 'animate-spin' : ''}`} />
+              {syncingCalendar ? 'Syncing...' : 'Sync Calendar'}
+            </Button>
+          )}
+          <Button className="bg-primary hover:bg-primary/90" onClick={handleScheduleMeeting}>
+            <Plus className="h-4 w-4 mr-2" />
+            Schedule Meeting
+          </Button>
+        </div>
       </div>
+
+      {/* Google Calendar Integration Status */}
+      <Card className={`glass-effect ${isGoogleConnected ? 'border-green-500/30' : 'border-yellow-500/30'}`}>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className={`p-2 rounded-full mr-3 ${isGoogleConnected ? 'bg-green-500/10' : 'bg-yellow-500/10'}`}>
+                <Settings className={`h-4 w-4 ${isGoogleConnected ? 'text-green-500' : 'text-yellow-500'}`} />
+              </div>
+              <div>
+                <h3 className="font-semibold">
+                  Google Calendar {isGoogleConnected ? 'Connected' : 'Not Configured'}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {isGoogleConnected 
+                    ? 'Calendar events will sync automatically' 
+                    : 'Configure Google Calendar API to sync external events'
+                  }
+                </p>
+              </div>
+            </div>
+            {!isGoogleConnected && (
+              <Button variant="outline" size="sm" onClick={() => handleSyncGoogleCalendar()}>
+                Setup Guide
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Calendar Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

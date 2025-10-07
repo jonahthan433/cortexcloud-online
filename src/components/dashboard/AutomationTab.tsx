@@ -15,8 +15,12 @@ import {
   Calendar,
   Zap,
   TrendingUp,
-  Clock
+  Clock,
+  Bot,
+  Crown,
+  Brain
 } from "lucide-react";
+import { FeatureGate } from "./FeatureGate";
 
 export const AutomationTab = () => {
   const { toast } = useToast();
@@ -158,6 +162,108 @@ export const AutomationTab = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* AI-Powered Automations */}
+      <FeatureGate 
+        feature="AI-Powered Automations"
+        requiredPlan="elevate"
+        upgradeMessage="Unlock intelligent automations powered by AI that learn and optimize from your data."
+      >
+        <Card className="glass-effect border-primary/30">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Bot className="h-5 w-5 text-primary" />
+              <span>AI-Powered Automations</span>
+              <Badge className="bg-gradient-primary text-primary-foreground">
+                <Bot className="h-3 w-3 mr-1" />
+                AI Enhanced
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              <Card className="glass-effect border-primary/10">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <Bot className="h-6 w-6 text-primary" />
+                    <div>
+                      <h4 className="font-medium">Smart Lead Scoring</h4>
+                      <p className="text-xs text-muted-foreground">AI rates potential customers</p>
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-green-500">94%</div>
+                  <div className="text-xs text-muted-foreground">Accuracy Rate</div>
+                </CardContent>
+              </Card>
+              
+              <Card className="glass-effect border-primary/10">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <Brain className="h-6 w-6 text-primary" />
+                    <div>
+                      <h4 className="font-medium">Content Optimization</h4>
+                      <p className="text-xs text-muted-foreground">AI improves messaging</p>
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-blue-500">+34%</div>
+                  <div className="text-xs text-muted-foreground">Response Rate</div>
+                </CardContent>
+              </Card>
+              
+              <Card className="glass-effect border-primary/10">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <TrendingUp className="h-6 w-6 text-primary" />
+                    <div>
+                      <h4 className="font-medium">Predictive Analytics</h4>
+                      <p className="text-xs text-muted-foreground">Forecast customer behavior</p>
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-purple-500">87%</div>
+                  <div className="text-xs text-muted-foreground">Prediction Accuracy</div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="space-y-4">
+              <h4 className="font-medium">AI Automation Templates</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Button variant="outline" className="h-auto p-4 justify-start">
+                  <Bot className="h-5 w-5 mr-3 text-primary" />
+                  <div className="text-left">
+                    <div className="font-medium">Intelligent Follow-up</div>
+                    <div className="text-xs text-muted-foreground">AI decides when and how to follow up</div>
+                  </div>
+                </Button>
+                
+                <Button variant="outline" className="h-auto p-4 justify-start">
+                  <Users className="h-5 w-5 mr-3 text-primary" />
+                  <div className="text-left">
+                    <div className="font-medium">Auto Lead Qualification</div>
+                    <div className="text-xs text-muted-foreground">AI scores and prioritizes leads</div>
+                  </div>
+                </Button>
+                
+                <Button variant="outline" className="h-auto p-4 justify-start">
+                  <Calendar className="h-5 w-5 mr-3 text-primary" />
+                  <div className="text-left">
+                    <div className="font-medium">Smart Scheduling</div>
+                    <div className="text-xs text-muted-foreground">AI optimizes meeting times</div>
+                  </div>
+                </Button>
+                
+                <Button variant="outline" className="h-auto p-4 justify-start">
+                  <Mail className="h-5 w-5 mr-3 text-primary" />
+                  <div className="text-left">
+                    <div className="font-medium">Dynamic Email Copy</div>
+                    <div className="text-xs text-muted-foreground">AI personalizes messages</div>
+                  </div>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </FeatureGate>
 
       {/* Automation List */}
       <div className="space-y-4">

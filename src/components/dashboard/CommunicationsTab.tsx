@@ -15,8 +15,11 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  User
+  User,
+  Smartphone,
+  Download
 } from "lucide-react";
+import { FeatureGate } from "./FeatureGate";
 
 export const CommunicationsTab = () => {
   const { toast } = useToast();
@@ -159,6 +162,113 @@ export const CommunicationsTab = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* WhatsApp Integration */}
+      <FeatureGate 
+        feature="WhatsApp Business Integration"
+        requiredPlan="elevate"
+        upgradeMessage="Connect WhatsApp Business API for direct customer messaging with advanced automation capabilities."
+      >
+        <Card className="glass-effect border-primary/30">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Smartphone className="h-5 w-5 text-green-500" />
+              <span>WhatsApp Business Integration</span>
+              <Badge className="bg-green-100 text-green-800">
+                <Smartphone className="h-3 w-3 mr-1" />
+                Connected
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="col-span-1 bg-green-50 border-green-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className="p-2 bg-green-100 rounded-full">
+                        <MessageSquare className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-green-600">89</div>
+                        <div className="text-sm text-green-700">Messages Sent</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-green-600">+23% this week</div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="col-span-1 bg-green-50 border-green-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className="p-2 bg-green-100 rounded-full">
+                        <User className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-green-600">45</div>
+                        <div className="text-sm text-green-700">Active Chats</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-green-600">95% response rate</div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="col-span-1 bg-green-50 border-green-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className="p-2 bg-green-100 rounded-full">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-green-600">12min</div>
+                        <div className="text-sm text-green-700">Avg Response</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-green-600">Fast response</div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="space-y-4">
+                <h4 className="font-medium">WhatsApp Features</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button variant="outline" className="h-auto p-4 justify-start border-green-200 hover:bg-green-50">
+                    <Smartphone className="h-5 w-5 mr-3 text-green-600" />
+                    <div className="text-left">
+                      <div className="font-medium">Bulk Message Broadcasting</div>
+                      <div className="text-xs text-muted-foreground">Send messages to multiple contacts</div>
+                    </div>
+                  </Button>
+                  
+                  <Button variant="outline" className="h-auto p-4 justify-start border-green-200 hover:bg-green-50">
+                    <MessageSquare className="h-5 w-5 mr-3 text-green-600" />
+                    <div className="text-left">
+                      <div className="font-medium">Automated Welcome Messages</div>
+                      <div className="text-xs text-muted-foreground">Instant reply templates</div>
+                    </div>
+                  </Button>
+                  
+                  <Button variant="outline" className="h-auto p-4 justify-start border-green-200 hover:bg-green-50">
+                    <Download className="h-5 w-5 mr-3 text-green-600" />
+                    <div className="text-left">
+                      <div className="font-medium">Multimedia Support</div>
+                      <div className="text-xs text-muted-foreground">Images, documents, voice notes</div>
+                    </div>
+                  </Button>
+                  
+                  <Button variant="outline" className="h-auto p-4 justify-start border-green-200 hover:bg-green-50">
+                    <Phone className="h-5 w-5 mr-3 text-green-600" />
+                    <div className="text-left">
+                      <div className="font-medium">WhatsApp Calling</div>
+                      <div className="text-xs text-muted-foreground">Voice and video calls</div>
+                    </div>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </FeatureGate>
 
       {/* Search and Filters */}
       <Card className="glass-effect border-primary/20">

@@ -23,8 +23,18 @@ import { CommunicationsTab } from "@/components/dashboard/CommunicationsTab";
 import { CalendarTab } from "@/components/dashboard/CalendarTab";
 import { SettingsTab } from "@/components/dashboard/SettingsTab";
 
+// Plan-specific dashboards
+import { PlanSelector } from "@/components/dashboard/PlanSelector";
+import { InitiateDashboard } from "@/components/dashboard/InitiateDashboard";
+import { ElevateDashboard } from "@/components/dashboard/ElevateDashboard";
+import { CustomDashboard } from "@/components/dashboard/CustomDashboard";
+
+// Context
+import { usePlan } from "@/contexts/PlanContext";
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const { currentPlan } = usePlan();
 
   const quickStats = [
     {
@@ -56,6 +66,19 @@ const Dashboard = () => {
       color: "text-orange-500"
     }
   ];
+
+  const renderPlanDashboard = () => {
+    switch (currentPlan) {
+      case 'initiate':
+        return <InitiateDashboard />;
+      case 'elevate':
+        return <ElevateDashboard />;
+      case 'custom':
+        return <CustomDashboard />;
+      default:
+        return <InitiateDashboard />;
+    }
+  };
 
   const recentActivities = [
     {
@@ -144,7 +167,7 @@ const Dashboard = () => {
               </TabsList>
 
               <TabsContent value="overview" className="mt-6">
-                <OverviewTab />
+                {renderPlanDashboard()}
               </TabsContent>
 
               <TabsContent value="crm" className="mt-6">
@@ -171,6 +194,9 @@ const Dashboard = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Plan Selector */}
+            <PlanSelector />
+
             {/* Recent Activity */}
             <Card className="glass-effect border-primary/20">
               <CardHeader>
