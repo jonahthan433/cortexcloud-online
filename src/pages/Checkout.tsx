@@ -45,9 +45,9 @@ const Checkout = () => {
   const plans: Plan[] = [
     {
       name: "Initiate",
-      price: isYearly ? "$157" : "$197",
-      period: "/month",
-      originalPrice: isYearly ? "$197" : undefined,
+      price: isYearly ? "$191.99" : "$19.99",
+      period: isYearly ? "/year" : "/month",
+      originalPrice: isYearly ? "$239.88" : undefined,
       description: "Perfect for businesses getting started with automation",
       features: [
         "Business Setup & Integration",
@@ -64,9 +64,9 @@ const Checkout = () => {
     },
     {
       name: "Elevate",
-      price: isYearly ? "$237" : "$297",
-      period: "/month",
-      originalPrice: isYearly ? "$297" : undefined,
+      price: isYearly ? "$479.99" : "$49.99",
+      period: isYearly ? "/year" : "/month",
+      originalPrice: isYearly ? "$599.88" : undefined,
       description: "For growing businesses that need advanced features",
       features: [
         "Everything in Initiate",

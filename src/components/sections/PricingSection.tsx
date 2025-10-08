@@ -10,9 +10,9 @@ export function PricingSection() {
   const plans = [
         {
           name: "Initiate",
-          price: isYearly ? "$157" : "$197",
-          period: isYearly ? "/month" : "/month",
-          originalPrice: isYearly ? "$197" : null,
+          price: isYearly ? "$191.99" : "$19.99",
+          period: isYearly ? "/year" : "/month",
+          originalPrice: isYearly ? "$239.88" : null,
           description: "Perfect for businesses getting started with automation",
       features: [
         "Business Setup & Integration",
@@ -30,9 +30,9 @@ export function PricingSection() {
     },
         {
           name: "Elevate",
-          price: isYearly ? "$237" : "$297",
-          period: isYearly ? "/month" : "/month",
-          originalPrice: isYearly ? "$297" : null,
+          price: isYearly ? "$479.99" : "$49.99",
+          period: isYearly ? "/year" : "/month",
+          originalPrice: isYearly ? "$599.88" : null,
           description: "For growing businesses that need advanced features",
       features: [
         "Everything in Initiate",
