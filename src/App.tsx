@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PlanProvider } from "@/contexts/PlanContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { Suspense } from "react";
+import { PageLoading } from "@/components/LoadingStates";
 import Index from "./pages/Index";
 import Booking from "./pages/Booking";
 import Admin from "./pages/Admin";
@@ -20,44 +23,60 @@ import Diagnostic from "./pages/Diagnostic";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <PlanProvider>
-        <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/booking" element={<Booking />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/auth/login" element={<Login />} />
-                <Route path="/auth/register" element={<Register />} />
-                <Route path="/auth/callback" element={<AuthCallback />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                <Route path="/test" element={<Test />} />
-                <Route path="/ai-mentorship" element={<AIMentorship />} />
-                <Route path="/diagnostic" element={<Diagnostic />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute requireTrial={true}>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-      </PlanProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <PlanProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Suspense fallback={<PageLoading />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/booking" element={<Booking />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/auth/login" element={<Login />} />
+                  <Route path="/auth/register" element={<Register />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                  <Route path="/test" element={<Test />} />
+                  <Route path="/ai-mentorship" element={<AIMentorship />} />
+                  <Route path="/diagnostic" element={<Diagnostic />} />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute requireTrial={true}>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </TooltipProvider>
+        </PlanProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
