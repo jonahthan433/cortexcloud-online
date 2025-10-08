@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "moduleResolution": "node",
+    "strict": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "jsx": "react",
+    "typeRoots": ["./node_modules/@types", "./types.d.ts"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}

@@ -8,17 +8,31 @@ interface User {
   company?: string;
   trial_started: boolean;
   trial_expires_at?: string;
+  trial_reminder_sent?: boolean;
+  paid_subscription_starts_at?: string;
   plan?: string;
+}
+
+interface TrialStatus {
+  status: 'not_started' | 'active' | 'expired' | 'subscribed' | 'unknown';
+  message: string;
+  daysRemaining?: number;
+  expiresAt?: string;
+  expiredAt?: string;
+  subscriptionStarted?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  trialStatus: TrialStatus | null;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   signUp: (email: string, password: string, name: string, company?: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   startTrial: (email: string) => Promise<{ success: boolean; error?: string }>;
+  checkTrialStatus: () => Promise<TrialStatus>;
+  startPaidSubscription: (email: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,6 +52,7 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [trialStatus, setTrialStatus] = useState<TrialStatus | null>(null);
 
   useEffect(() => {
     // Check for development login first
@@ -74,6 +89,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           await fetchUserData(session.user.id);
         } else {
           setUser(null);
+          setTrialStatus(null);
         }
         setLoading(false);
       }
@@ -81,6 +97,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // New effect to update trial status whenever user changes
+  useEffect(() => {
+    if (user) {
+      checkTrialStatus().then(status => setTrialStatus(status));
+    }
+  }, [user]);
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -103,14 +126,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           company: userData.company,
           trial_started: userData.trial_started,
           trial_expires_at: userData.trial_expires_at,
+          trial_reminder_sent: userData.trial_reminder_sent,
+          paid_subscription_starts_at: userData.paid_subscription_starts_at,
           plan: userData.plan
         });
+
+        // After setting user data, check trial status
+        const { data: trialData } = await supabase
+          .rpc('check_trial_status', { user_id: userId });
+        
+        if (trialData) {
+          setTrialStatus(trialData as TrialStatus);
+        }
       } else {
         // User doesn't exist in our users table yet
         setUser({
           id: userId,
           email: '',
           trial_started: false
+        });
+
+        setTrialStatus({
+          status: 'not_started',
+          message: 'Trial not started'
         });
       }
     } catch (error) {
@@ -211,6 +249,55 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const checkTrialStatus = async (): Promise<TrialStatus> => {
+    if (!user) {
+      return {
+        status: 'unknown',
+        message: 'No user logged in'
+      };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .rpc('check_trial_status', { user_id: user.id });
+
+      if (error) throw error;
+
+      return data as TrialStatus;
+    } catch (error) {
+      console.error('Error checking trial status:', error);
+      return {
+        status: 'unknown',
+        message: 'Failed to check trial status'
+      };
+    }
+  };
+
+  const startPaidSubscription = async (email: string) => {
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          paid_subscription_starts_at: new Date().toISOString(),
+          plan: 'paid'
+        })
+        .eq('email', email);
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      // Refresh user data
+      if (user) {
+        await fetchUserData(user.id);
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Failed to start paid subscription' };
+    }
+  };
+
   const startTrial = async (email: string) => {
     try {
       // Update user's trial status
@@ -240,11 +327,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const value = {
     user,
     loading,
+    trialStatus,
     signIn,
     signInWithGoogle,
     signUp,
     signOut,
     startTrial,
+    checkTrialStatus,
+    startPaidSubscription
   };
 
   return (

@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.3",
+    "@sendgrid/mail": "https://esm.sh/@sendgrid/mail",
+    "std/": "https://deno.land/std@0.177.0/"
+  }
+}

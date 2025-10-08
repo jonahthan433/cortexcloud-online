@@ -1,0 +1,9 @@
+{
+  "functions": [
+    {
+      "name": "trial-expiration-notifications",
+      "schedule": "0 0 * * *",
+      "httpMethod": "GET"
+    }
+  ]
+}

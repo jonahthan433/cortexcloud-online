@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { PricingSection } from './PricingSection';
+import { PricingSection } from '../PricingSection';
 import { BrowserRouter } from 'react-router-dom';
 
 describe('PricingSection', () => {

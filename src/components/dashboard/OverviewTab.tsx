@@ -117,7 +117,7 @@ export const OverviewTab = () => {
               </div>
             </CardContent>
           </Card>
-        )) : metrics ? metrics.map((metric, index) => (
+        )) : metrics ? metrics.map((metric: DashboardMetric, index: number) => (
           <Card key={index} className="glass-effect border-primary/20">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -139,7 +139,7 @@ export const OverviewTab = () => {
               </div>
             </CardContent>
           </Card>
-        ))}
+        )) : null}
       </div>
 
       {/* Charts and Analytics */}

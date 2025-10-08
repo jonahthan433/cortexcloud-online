@@ -24,6 +24,9 @@ export type Database = {
               plan: string
               trial_expires_at: string | null
               trial_started: boolean
+              trial_reminder_sent: boolean
+              paid_subscription_starts_at: string | null
+              trial_status: 'not_started' | 'active' | 'expired' | 'subscribed' | 'unknown'
               updated_at: string | null
             }
             Insert: {
@@ -35,6 +38,9 @@ export type Database = {
               plan?: string
               trial_expires_at?: string | null
               trial_started?: boolean
+              trial_reminder_sent?: boolean
+              paid_subscription_starts_at?: string | null
+              trial_status?: 'not_started' | 'active' | 'expired' | 'subscribed' | 'unknown'
               updated_at?: string | null
             }
             Update: {
@@ -46,6 +52,9 @@ export type Database = {
               plan?: string
               trial_expires_at?: string | null
               trial_started?: boolean
+              trial_reminder_sent?: boolean
+              paid_subscription_starts_at?: string | null
+              trial_status?: 'not_started' | 'active' | 'expired' | 'subscribed' | 'unknown'
               updated_at?: string | null
             }
             Relationships: []
@@ -282,6 +291,17 @@ export type Database = {
           p_duration_minutes?: number
         }
         Returns: boolean
+      }
+      check_trial_status: {
+        Args: { user_id: string };
+        Returns: {
+          status: 'not_started' | 'active' | 'expired' | 'subscribed' | 'unknown';
+          message: string;
+          daysRemaining?: number;
+          expiresAt?: string;
+          expiredAt?: string;
+          subscriptionStarted?: string;
+        };
       }
     }
     Enums: {
