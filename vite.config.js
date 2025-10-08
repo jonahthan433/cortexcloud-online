@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
 
-const config = {
+export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
@@ -13,13 +13,4 @@ const config = {
       '@': path.resolve(__dirname, './src')
     }
   }
-}
-
-export default defineConfig(config)
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-}));
+})
