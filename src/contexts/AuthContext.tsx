@@ -15,6 +15,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   signUp: (email: string, password: string, name: string, company?: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   startTrial: (email: string) => Promise<{ success: boolean; error?: string }>;
@@ -139,6 +140,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+            scope: 'https://www.googleapis.com/auth/calendar'
+          }
+        }
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      // Note: The actual user data will be handled by the auth state change listener
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Failed to sign in with Google' };
+    }
+  };
+
   const signUp = async (email: string, password: string, name: string, company?: string) => {
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -215,6 +241,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     user,
     loading,
     signIn,
+    signInWithGoogle,
     signUp,
     signOut,
     startTrial,

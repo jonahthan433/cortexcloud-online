@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import { 
@@ -18,12 +19,21 @@ import {
   Settings
 } from "lucide-react";
 import { googleApiService } from "@/services/googleApiService";
+import type { CalendarEvent, CalendarTimeSlot, CalendarStats } from "@/types/calendar";
 
 export const CalendarTab = () => {
   const { toast } = useToast();
-  const [googleEvents, setGoogleEvents] = useState<any[]>([]);
+  const [googleEvents, setGoogleEvents] = useState<CalendarEvent[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<CalendarTimeSlot[]>([]);
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [syncingCalendar, setSyncingCalendar] = useState(false);
+  const [calendarStats, setCalendarStats] = useState<CalendarStats>({
+    todayMeetings: 0,
+    confirmed: 0,
+    pending: 0,
+    monthTotal: 0
+  });
 
   const handleScheduleMeeting = () => {
     toast({
@@ -46,15 +56,85 @@ export const CalendarTab = () => {
     });
   };
 
-  // Check Google Calendar integration status
+  // Initialize calendar and fetch data
   useEffect(() => {
-    const checkGoogleCalendarStatus = async () => {
-      const status = googleApiService.getConfigurationStatus();
-      setIsGoogleConnected(status.googleCalendarConfigured);
+    const initializeCalendar = async () => {
+      const status = await googleApiService.initializeGoogleAuth();
+      setIsGoogleConnected(status);
+      
+      if (status) {
+        await handleSyncGoogleCalendar();
+        await fetchAvailableTimeSlots(selectedDate);
+        updateCalendarStats();
+      }
     };
-    
-    checkGoogleCalendarStatus();
+
+    initializeCalendar();
   }, []);
+
+  // Update calendar stats
+  const updateCalendarStats = async () => {
+    try {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      // Get today's events
+      const todayEvents = await googleApiService.getCalendarEvents(today, tomorrow);
+      
+      // Get month's events
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const monthEvents = await googleApiService.getCalendarEvents(monthStart, monthEnd);
+      
+      setCalendarStats({
+        todayMeetings: todayEvents.length,
+        confirmed: monthEvents.filter(e => e.status === 'confirmed').length,
+        pending: monthEvents.filter(e => e.status === 'tentative').length,
+        monthTotal: monthEvents.length
+      });
+    } catch (error: any) {
+      console.error('Failed to update calendar stats:', error);
+    }
+  };
+
+  // Fetch available time slots
+  const fetchAvailableTimeSlots = async (date: Date) => {
+    try {
+      const slots = await googleApiService.getCalendarEvents(
+        new Date(date.setHours(0, 0, 0, 0)),
+        new Date(date.setHours(23, 59, 59, 999))
+      );
+
+      // Convert events to available time slots
+      const businessHours = Array.from({ length: 32 }, (_, i) => {
+        const slotStart = new Date(date.setHours(9 + Math.floor(i/2), (i % 2) * 30, 0, 0));
+        const slotEnd = new Date(slotStart.getTime() + 30 * 60000);
+        
+        const isSlotAvailable = !slots.some(event => {
+          const eventStart = new Date(event.start.dateTime);
+          const eventEnd = new Date(event.end.dateTime);
+          return slotStart < eventEnd && slotEnd > eventStart;
+        });
+
+        return {
+          start: slotStart.toISOString(),
+          end: slotEnd.toISOString(),
+          available: isSlotAvailable
+        };
+      });
+
+      setAvailableTimeSlots(businessHours);
+    } catch (error: any) {
+      console.error('Failed to fetch available time slots:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load available time slots",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Sync Google Calendar
   const handleSyncGoogleCalendar = async () => {
@@ -69,11 +149,18 @@ export const CalendarTab = () => {
 
     setSyncingCalendar(true);
     try {
+      // Fetch events for the next 30 days
       const now = new Date();
-      const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // Next 30 days
+      const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
       
       const events = await googleApiService.getCalendarEvents(now, endDate);
       setGoogleEvents(events);
+      
+      // Update calendar stats
+      await updateCalendarStats();
+      
+      // Update available time slots for selected date
+      await fetchAvailableTimeSlots(selectedDate);
       
       toast({
         title: "Calendar Synced",
@@ -172,8 +259,8 @@ export const CalendarTab = () => {
       {/* Calendar Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Calendar Management</h2>
-          <p className="text-muted-foreground">Schedule and manage your appointments</p>
+          <h2 className="text-2xl font-bold text-foreground">Appointments Overview</h2>
+          <p className="text-muted-foreground">View and manage your scheduled appointments</p>
         </div>
         <div className="flex items-center gap-2">
           {isGoogleConnected && (
@@ -183,12 +270,15 @@ export const CalendarTab = () => {
               disabled={syncingCalendar}
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${syncingCalendar ? 'animate-spin' : ''}`} />
-              {syncingCalendar ? 'Syncing...' : 'Sync Calendar'}
+              {syncingCalendar ? 'Syncing...' : 'Refresh'}
             </Button>
           )}
-          <Button className="bg-primary hover:bg-primary/90" onClick={handleScheduleMeeting}>
+          <Button 
+            className="bg-primary hover:bg-primary/90" 
+            onClick={() => window.location.href = '/booking'}
+          >
             <Plus className="h-4 w-4 mr-2" />
-            Schedule Meeting
+            New Appointment
           </Button>
         </div>
       </div>
@@ -226,49 +316,51 @@ export const CalendarTab = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="glass-effect border-primary/20">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-500">12</div>
+            <div className="text-2xl font-bold text-blue-500">{calendarStats.todayMeetings}</div>
             <div className="text-sm text-muted-foreground">Today's Meetings</div>
           </CardContent>
         </Card>
         <Card className="glass-effect border-primary/20">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-500">8</div>
+            <div className="text-2xl font-bold text-green-500">{calendarStats.confirmed}</div>
             <div className="text-sm text-muted-foreground">Confirmed</div>
           </CardContent>
         </Card>
         <Card className="glass-effect border-primary/20">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-yellow-500">3</div>
+            <div className="text-2xl font-bold text-yellow-500">{calendarStats.pending}</div>
             <div className="text-sm text-muted-foreground">Pending</div>
           </CardContent>
         </Card>
         <Card className="glass-effect border-primary/20">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-500">156</div>
+            <div className="text-2xl font-bold text-purple-500">{calendarStats.monthTotal}</div>
             <div className="text-sm text-muted-foreground">This Month</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Calendar View */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Calendar Widget */}
-        <div className="lg:col-span-1">
-          <Card className="glass-effect border-primary/20">
-            <CardHeader>
-              <CardTitle>Calendar</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 bg-muted/20 rounded-lg flex items-center justify-center">
-                <div className="text-center text-muted-foreground">
-                  <CalendarIcon className="h-12 w-12 mx-auto mb-4" />
-                  <p>Calendar widget</p>
-                  <p className="text-sm">Integration coming soon</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="space-y-6">
+        <Card className="glass-effect border-primary/20">
+          <CardHeader>
+            <CardTitle>Appointment Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center">
+              <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-primary" />
+              <p className="text-lg font-medium mb-2">Need to schedule appointments?</p>
+              <p className="text-muted-foreground mb-4">Use our booking page to manage appointments and sync with your calendar.</p>
+              <Button 
+                onClick={() => window.location.href = '/booking'} 
+                className="bg-primary hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Go to Booking Page
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Upcoming Events */}
         <div className="lg:col-span-2">
@@ -277,50 +369,65 @@ export const CalendarTab = () => {
               <CardTitle>Upcoming Events</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {upcomingEvents.map((event) => (
-                <div key={event.id} className="flex items-center justify-between p-4 border border-primary/10 rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      {getTypeIcon(event.type)}
+              {googleEvents.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Calendar className="h-12 w-12 mx-auto mb-4" />
+                  <p>No upcoming events</p>
+                  <p className="text-sm">Click 'Schedule Meeting' to create one</p>
+                </div>
+              ) : (
+                googleEvents.map((event) => (
+                  <div key={event.id} className="flex items-center justify-between p-4 border border-primary/10 rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                        {getTypeIcon(event.type)}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-foreground">{event.summary}</h3>
+                        <p className="text-sm text-muted-foreground">{event.description || 'No description'}</p>
+                        <div className="flex items-center space-x-4 mt-2">
+                          <span className="text-xs text-muted-foreground flex items-center">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {new Date(event.start.dateTime).toLocaleTimeString([], { 
+                              hour: '2-digit', 
+                              minute: '2-digit'
+                            })}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(event.start.dateTime).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-medium text-foreground">{event.title}</h3>
-                      <p className="text-sm text-muted-foreground">{event.description}</p>
-                      <div className="flex items-center space-x-4 mt-2">
-                        <span className="text-xs text-muted-foreground flex items-center">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {event.time}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{event.date}</span>
+                    
+                    <div className="flex items-center space-x-3">
+                      <Badge className={getStatusColor(event.status)}>
+                        {getStatusIcon(event.status)}
+                        <span className="ml-1">{event.status}</span>
+                      </Badge>
+                      
+                      <div className="flex items-center space-x-2">
+                        {event.conferenceData && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEventAction("Join", event.summary)}
+                          >
+                            <Video className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEventAction("View", event.summary)}
+                        >
+                          <User className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <Badge className={getStatusColor(event.status)}>
-                      {getStatusIcon(event.status)}
-                      <span className="ml-1">{event.status}</span>
-                    </Badge>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleEventAction("Join", event.title)}
-                      >
-                        <Video className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleEventAction("View", event.title)}
-                      >
-                        <User className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
         </div>
@@ -340,6 +447,7 @@ export const CalendarTab = () => {
             >
               <Video className="h-6 w-6" />
               <span>Video Call</span>
+              <span className="text-xs text-muted-foreground">30 min</span>
             </Button>
             <Button 
               variant="outline" 
@@ -348,6 +456,7 @@ export const CalendarTab = () => {
             >
               <Phone className="h-6 w-6" />
               <span>Phone Call</span>
+              <span className="text-xs text-muted-foreground">15 min</span>
             </Button>
             <Button 
               variant="outline" 
@@ -356,14 +465,21 @@ export const CalendarTab = () => {
             >
               <MapPin className="h-6 w-6" />
               <span>In-Person</span>
+              <span className="text-xs text-muted-foreground">60 min</span>
             </Button>
             <Button 
               variant="outline" 
-              className="h-20 flex flex-col items-center justify-center space-y-2"
+              className="h-20 flex flex-col items-center justify-center space-y-2 relative"
               onClick={() => handleQuickAction("Block Time")}
             >
               <CalendarIcon className="h-6 w-6" />
               <span>Block Time</span>
+              <span className="text-xs text-muted-foreground">Custom</span>
+              <div className="absolute -top-1 -right-1">
+                <Badge variant="secondary" className="h-6 w-6 rounded-full p-0 flex items-center justify-center">
+                  <Plus className="h-4 w-4" />
+                </Badge>
+              </div>
             </Button>
           </div>
         </CardContent>
