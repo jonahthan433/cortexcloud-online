@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { communicationsService } from "@/services/communicationsService";
+import type { MessageThread, Message, CommunicationStats } from "@/services/communicationsService";
 import { 
   Send, 
   Plus, 
@@ -25,48 +27,80 @@ export const CommunicationsTab = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [messageText, setMessageText] = useState("");
-  const [selectedConversation, setSelectedConversation] = useState(1);
+  const [selectedThread, setSelectedThread] = useState<string | null>(null);
+  const [threads, setThreads] = useState<MessageThread[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [stats, setStats] = useState<CommunicationStats>({
+    emailsSent: 0,
+    whatsappMessages: 0,
+    slackMessages: 0,
+    callsMade: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
-  const initialConversations = [
-    {
-      id: 1,
-      contact: "John Smith",
-      platform: "Email",
-      lastMessage: "Thanks for the proposal, I'll review it and get back to you.",
-      time: "2 minutes ago",
-      status: "unread",
-      avatar: "JS"
-    },
-    {
-      id: 2,
-      contact: "Sarah Johnson",
-      platform: "WhatsApp",
-      lastMessage: "Can we schedule a call for tomorrow?",
-      time: "15 minutes ago",
-      status: "read",
-      avatar: "SJ"
-    },
-    {
-      id: 3,
-      contact: "Mike Davis",
-      platform: "Email",
-      lastMessage: "The automation workflow looks great!",
-      time: "1 hour ago",
-      status: "read",
-      avatar: "MD"
-    },
-    {
-      id: 4,
-      contact: "Lisa Wilson",
-      platform: "Slack",
-      lastMessage: "Let's discuss the project timeline",
-      time: "2 hours ago",
-      status: "unread",
-      avatar: "LW"
-    }
-  ];
+  // Fetch initial data
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      setIsLoading(true);
+      try {
+        const [threadsData, statsData] = await Promise.all([
+          communicationsService.getMessageThreads(),
+          communicationsService.getCommunicationStats()
+        ]);
+        
+        setThreads(threadsData);
+        setStats(statsData);
+        
+        // Select first thread if exists
+        if (threadsData.length > 0) {
+          setSelectedThread(threadsData[0].id);
+          const messages = await communicationsService.getMessages(threadsData[0].id);
+          setMessages(messages);
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load communications data",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const [conversations] = useState(initialConversations);
+    fetchInitialData();
+  }, []);
+
+  // Load messages when thread is selected
+  useEffect(() => {
+    const loadMessages = async () => {
+      if (!selectedThread) return;
+
+      setIsLoading(true);
+      try {
+        const messages = await communicationsService.getMessages(selectedThread);
+        setMessages(messages);
+        await communicationsService.markThreadAsRead(selectedThread);
+        
+        // Update thread status to read
+        setThreads(prev => prev.map(thread =>
+          thread.id === selectedThread
+            ? { ...thread, status: 'read' }
+            : thread
+        ));
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load messages",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMessages();
+  }, [selectedThread]);
 
   const handleNewMessage = () => {
     toast({
@@ -75,13 +109,36 @@ export const CommunicationsTab = () => {
     });
   };
 
-  const handleSendMessage = () => {
-    if (messageText.trim()) {
+  const [isSending, setIsSending] = useState(false);
+
+  const handleSendMessage = async () => {
+    if (!selectedThread || !messageText.trim() || isSending) return;
+
+    setIsSending(true);
+    try {
+      const newMessage = await communicationsService.sendMessage(selectedThread, messageText);
+      setMessages(prev => [...prev, newMessage]);
+      setMessageText("");
+      
+      // Update the thread's last message
+      setThreads(prev => prev.map(thread => 
+        thread.id === selectedThread
+          ? { ...thread, lastMessage: messageText, time: 'Just now' }
+          : thread
+      ));
+
       toast({
         title: "Message Sent",
-        description: `Message sent to ${conversations.find(c => c.id === selectedConversation)?.contact}`,
+        description: `Message sent to ${threads.find(t => t.id === selectedThread)?.contact}`,
       });
-      setMessageText("");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -92,9 +149,9 @@ export const CommunicationsTab = () => {
     });
   };
 
-  const filteredConversations = conversations.filter(conversation =>
-    conversation.contact.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conversation.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredThreads = threads.filter(thread =>
+    thread.contact.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    thread.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getPlatformIcon = (platform: string) => {
@@ -139,25 +196,25 @@ export const CommunicationsTab = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="glass-effect border-primary/20">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-500">156</div>
+            <div className="text-2xl font-bold text-blue-500">{stats.emailsSent}</div>
             <div className="text-sm text-muted-foreground">Emails Sent</div>
           </CardContent>
         </Card>
         <Card className="glass-effect border-primary/20">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-500">89</div>
+            <div className="text-2xl font-bold text-green-500">{stats.whatsappMessages}</div>
             <div className="text-sm text-muted-foreground">WhatsApp Messages</div>
           </CardContent>
         </Card>
         <Card className="glass-effect border-primary/20">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-500">45</div>
+            <div className="text-2xl font-bold text-purple-500">{stats.slackMessages}</div>
             <div className="text-sm text-muted-foreground">Slack Messages</div>
           </CardContent>
         </Card>
         <Card className="glass-effect border-primary/20">
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-orange-500">23</div>
+            <div className="text-2xl font-bold text-orange-500">{stats.callsMade}</div>
             <div className="text-sm text-muted-foreground">Calls Made</div>
           </CardContent>
         </Card>
@@ -298,37 +355,37 @@ export const CommunicationsTab = () => {
               <CardTitle>Recent Conversations</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {filteredConversations.map((conversation) => (
+              {filteredThreads.map((thread) => (
                 <div
-                  key={conversation.id}
+                  key={thread.id}
                   className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                    conversation.status === 'unread' 
+                    thread.status === 'unread' 
                       ? 'bg-primary/10 border border-primary/20' 
-                      : selectedConversation === conversation.id
+                      : selectedThread === thread.id
                       ? 'bg-primary/5 border border-primary/20'
                       : 'hover:bg-primary/5'
                   }`}
-                  onClick={() => setSelectedConversation(conversation.id)}
+                  onClick={() => setSelectedThread(thread.id)}
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-primary">{conversation.avatar}</span>
+                      <span className="text-sm font-medium text-primary">{thread.avatar}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-foreground truncate">
-                          {conversation.contact}
+                          {thread.contact}
                         </p>
                         <div className="flex items-center space-x-1">
-                          {getPlatformIcon(conversation.platform)}
-                          {getStatusIcon(conversation.status)}
+                          {getPlatformIcon(thread.platform)}
+                          {getStatusIcon(thread.status)}
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground truncate">
-                        {conversation.lastMessage}
+                        {thread.lastMessage}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {conversation.time}
+                        {thread.time}
                       </p>
                     </div>
                   </div>
@@ -340,72 +397,139 @@ export const CommunicationsTab = () => {
 
         {/* Chat Area */}
         <div className="lg:col-span-2">
-          <Card className="glass-effect border-primary/20 h-96">
+          <Card className="glass-effect border-primary/20 h-[calc(100vh-24rem)]">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-primary">JS</span>
+              {selectedThread ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-medium text-primary">
+                        {threads.find(t => t.id === selectedThread)?.avatar}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-foreground">
+                        {threads.find(t => t.id === selectedThread)?.contact}
+                      </h3>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-muted-foreground">
+                          {threads.find(t => t.id === selectedThread)?.platform}
+                        </span>
+                        <Badge variant="secondary" className="text-xs">
+                          Online
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium text-foreground">John Smith</h3>
-                    <p className="text-sm text-muted-foreground">Online</p>
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleCallAction("Call", threads.find(t => t.id === selectedThread)?.contact || '')}
+                    >
+                      <Phone className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleCallAction("Video Call", threads.find(t => t.id === selectedThread)?.contact || '')}
+                    >
+                      <Video className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => handleCallAction("Call", "John Smith")}
-                  >
-                    <Phone className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => handleCallAction("Video Call", "John Smith")}
-                  >
-                    <Video className="h-4 w-4" />
-                  </Button>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-muted-foreground">Select a conversation to start chatting</p>
                 </div>
-              </div>
+              )}
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
               {/* Chat Messages Area */}
               <div className="flex-1 bg-muted/20 rounded-lg p-4 mb-4 overflow-y-auto">
-                <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <div className="bg-primary text-primary-foreground rounded-lg p-3 max-w-xs">
-                      <p className="text-sm">Thanks for reaching out! I'd love to learn more about your services.</p>
-                      <p className="text-xs opacity-70 mt-1">2:30 PM</p>
-                    </div>
+                {isLoading ? (
+                  <div className="space-y-4">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <div key={index} className={`flex ${index % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+                        <div className="animate-pulse bg-primary/10 rounded-lg p-3 w-64 h-20" />
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex justify-start">
-                    <div className="bg-background border rounded-lg p-3 max-w-xs">
-                      <p className="text-sm">Great! I'll send you our proposal and we can schedule a call to discuss.</p>
-                      <p className="text-xs text-muted-foreground mt-1">2:32 PM</p>
-                    </div>
+                ) : messages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                    <MessageSquare className="h-12 w-12 mb-4" />
+                    <p>No messages yet</p>
+                    <p className="text-sm">Start the conversation</p>
                   </div>
-                  <div className="flex justify-end">
-                    <div className="bg-primary text-primary-foreground rounded-lg p-3 max-w-xs">
-                      <p className="text-sm">Perfect, looking forward to it!</p>
-                      <p className="text-xs opacity-70 mt-1">2:35 PM</p>
-                    </div>
+                ) : (
+                  <div className="space-y-4">
+                    {messages.map((message) => (
+                      <div 
+                        key={message.id} 
+                        className={`flex ${message.sender.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div 
+                          className={`rounded-lg p-3 max-w-xs ${
+                            message.sender.type === 'user'
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-background border'
+                          }`}
+                        >
+                          <p className="text-sm">{message.content}</p>
+                          {message.attachments?.map((attachment, index) => (
+                            <div key={index} className="mt-2 p-2 bg-background/10 rounded flex items-center gap-2">
+                              <Download className="h-4 w-4" />
+                              <span className="text-xs">{attachment.name}</span>
+                            </div>
+                          ))}
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs opacity-70">
+                              {new Date(message.timestamp).toLocaleTimeString([], { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
+                            </p>
+                            {message.sender.type === 'user' && (
+                              <span className="text-xs">
+                                {message.status === 'sent' && '✓'}
+                                {message.status === 'delivered' && '✓✓'}
+                                {message.status === 'read' && '✓✓'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                )}
               </div>
               
               {/* Message Input */}
               <div className="flex items-center space-x-2">
                 <Input
-                  placeholder="Type your message..."
+                  placeholder={selectedThread ? "Type your message..." : "Select a conversation to start chatting"}
                   className="flex-1"
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  disabled={!selectedThread}
                 />
-                <Button size="sm" onClick={handleSendMessage} disabled={!messageText.trim()}>
-                  <Send className="h-4 w-4" />
+                <Button 
+                  size="sm" 
+                  onClick={handleSendMessage} 
+                  disabled={!messageText.trim() || !selectedThread || isSending}
+                  className="shrink-0"
+                >
+                  {isSending ? (
+                    <span className="inline-block animate-spin">◌</span>
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </CardContent>

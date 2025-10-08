@@ -22,6 +22,7 @@ import { AutomationTab } from "@/components/dashboard/AutomationTab";
 import { CommunicationsTab } from "@/components/dashboard/CommunicationsTab";
 import { CalendarTab } from "@/components/dashboard/CalendarTab";
 import { SettingsTab } from "@/components/dashboard/SettingsTab";
+import { TrialStatusBanner } from "@/components/dashboard/TrialStatusBanner";
 
 // Plan-specific dashboards
 import { PlanSelector } from "@/components/dashboard/PlanSelector";
@@ -132,6 +133,9 @@ const Dashboard = () => {
       </div>
 
       <div className="container mx-auto px-6 py-8">
+        {/* Trial Status Banner */}
+        <TrialStatusBanner />
+
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {quickStats.map((stat, index) => (

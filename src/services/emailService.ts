@@ -1,21 +1,50 @@
+// Import email templates
+import { activationEmailTemplate } from '@/components/emails/ActivationEmail';
+import { welcomeEmailTemplate } from '@/components/emails/WelcomeEmail';
 import { supabase } from '@/integrations/supabase/client';
 
-interface ActivationEmailData {
-  email: string;
-  userName: string;
-  planName: string;
-  activationToken: string;
+interface EmailData {
+  to: string;
+  subject: string;
+  template: string;
+  data: Record<string, any>;
+}
+
+interface SendEmailResponse {
+  success: boolean;
+  error?: string;
+  token?: string;
 }
 
 export class EmailService {
-  private static generateActivationToken(): string {
-    // Generate a secure random token
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < 32; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+  private static async sendEmail(emailData: EmailData): Promise<SendEmailResponse> {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_EDGE_FUNCTION_SECRET}`
+        },
+        body: JSON.stringify(emailData)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to send email');
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error sending email:', error);
+      return { success: false, error: error.message };
     }
-    return result;
+  }
+
+  private static generateActivationToken(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    return Array.from(crypto.getRandomValues(new Uint8Array(32)))
+      .map((byte) => chars[byte % chars.length])
+      .join('');
   }
 
   private static generateActivationLink(token: string): string {
@@ -23,7 +52,11 @@ export class EmailService {
     return `${baseUrl}/auth/register?token=${token}&activated=true`;
   }
 
-  static async sendActivationEmail(email: string, userName: string, planName: string): Promise<{ success: boolean; token?: string; error?: string }> {
+  static async sendActivationEmail(
+    email: string,
+    userName: string,
+    planName: string
+  ): Promise<SendEmailResponse> {
     try {
       // Generate activation token
       const activationToken = this.generateActivationToken();
@@ -45,30 +78,10 @@ export class EmailService {
         return { success: false, error: 'Failed to create activation token' };
       }
 
-      // Generate activation link
       const activationLink = this.generateActivationLink(activationToken);
 
-      // In a real implementation, you would send the email using a service like:
-      // - SendGrid
-      // - Mailgun
-      // - AWS SES
-      // - Supabase Edge Functions
-      
-      // For now, we'll simulate the email sending and log the details
-      console.log('=== ACTIVATION EMAIL ===');
-      console.log('To:', email);
-      console.log('Subject: Welcome to CortexCloud - Activate Your Account');
-      console.log('Activation Link:', activationLink);
-      console.log('User Name:', userName);
-      console.log('Plan:', planName);
-      console.log('========================');
-
-      // Simulate email sending delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // In production, replace this with actual email service call:
-      /*
-      const emailData = {
+      // Send activation email through edge function
+      const emailData: EmailData = {
         to: email,
         subject: 'Welcome to CortexCloud - Activate Your Account',
         template: 'activation',
@@ -76,24 +89,20 @@ export class EmailService {
           userName,
           planName,
           activationLink,
-          companyName: 'CortexCloud'
+          companyName: 'CortexCloud',
+          emailContent: activationEmailTemplate({
+            userName,
+            planName,
+            activationLink
+          })
         }
       };
-      
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(emailData)
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to send email');
-      }
-      */
 
-      return { success: true, token: activationToken };
+      const result = await this.sendEmail(emailData);
+      if (result.success) {
+        return { success: true, token: activationToken };
+      }
+      return { success: false, error: result.error };
     } catch (error) {
       console.error('Error sending activation email:', error);
       return { success: false, error: 'Failed to send activation email' };

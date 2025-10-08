@@ -16,7 +16,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleAuthReady, setGoogleAuthReady] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -110,30 +110,20 @@ const Login = () => {
     setLoading(true);
     
     try {
-      // Use Supabase OAuth integration with Google
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-        }
-      });
+      const { success, error } = await signInWithGoogle();
 
-      if (error) {
-        toast({
-          title: "Sign-In Failed",
-          description: error.message || "Unable to sign in with Google",
-          variant: "destructive"
-        });
-      } else {
+      if (success) {
         toast({
           title: "Redirecting...",
           description: "Please complete sign-in with Google",
         });
-        // The redirect will happen automatically
+        // The redirect will happen automatically via Supabase
+      } else {
+        toast({
+          title: "Sign-In Failed",
+          description: error || "Unable to sign in with Google",
+          variant: "destructive"
+        });
       }
     } catch (error: any) {
       console.error('Google sign-in error:', error);
