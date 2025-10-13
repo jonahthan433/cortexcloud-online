@@ -1,0 +1,403 @@
+// Prisma schema for CortexCloud
+// Connects to Supabase PostgreSQL database
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("SUPABASE_DB_URL")
+  directUrl = env("SUPABASE_DB_URL")
+}
+
+// ===== Core User & Auth Models =====
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  avatar    String?
+  company   String?
+  role      UserRole @default(USER)
+  
+  // Subscription & Trial
+  subscription_tier  SubscriptionTier @default(TRIAL)
+  plan               String           @default("trial")
+  trial_started      Boolean          @default(false)
+  trial_expires_at   DateTime?
+  trial_reminder_sent Boolean         @default(false)
+  paid_subscription_starts_at DateTime?
+  
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  
+  // Relations
+  workspaces         Workspace[]
+  ownedWorkspaces    Workspace[]      @relation("WorkspaceOwner")
+  workflows          Workflow[]
+  documents          Document[]
+  apiKeys            ApiKey[]
+  subscriptions      Subscription[]
+  usageRecords       Usage[]
+  teamMemberships    TeamMember[]
+  auditLogs          AuditLog[]
+  
+  @@map("users")
+}
+
+model AdminUser {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  name          String
+  password_hash String
+  created_at    DateTime @default(now())
+  
+  @@map("admin_users")
+}
+
+// ===== Workspace & Team Models =====
+
+model Workspace {
+  id         String   @id @default(uuid())
+  name       String
+  owner_id   String
+  plan       SubscriptionTier @default(STARTER)
+  settings   Json?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  owner      User           @relation("WorkspaceOwner", fields: [owner_id], references: [id], onDelete: Cascade)
+  members    User[]
+  workflows  Workflow[]
+  documents  Document[]
+  teams      Team[]
+  integrations Integration[]
+  
+  @@map("workspaces")
+}
+
+model Team {
+  id           String   @id @default(uuid())
+  workspace_id String
+  name         String
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  
+  workspace    Workspace    @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  members      TeamMember[]
+  
+  @@map("teams")
+}
+
+model TeamMember {
+  id         String   @id @default(uuid())
+  team_id    String
+  user_id    String
+  role       TeamRole @default(VIEWER)
+  invited_at DateTime @default(now())
+  joined_at  DateTime?
+  
+  team       Team     @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@unique([team_id, user_id])
+  @@map("team_members")
+}
+
+// ===== Workflow Models =====
+
+model Workflow {
+  id            String   @id @default(uuid())
+  workspace_id  String
+  user_id       String
+  name          String
+  description   String?
+  steps         Json     // Array of workflow steps
+  status        WorkflowStatus @default(DRAFT)
+  triggers      Json?    // Trigger configuration
+  is_active     Boolean  @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  
+  workspace     Workspace       @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  user          User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  automation    Automation?
+  runs          WorkflowRun[]
+  workflowSteps WorkflowStep[]
+  
+  @@index([workspace_id])
+  @@index([user_id])
+  @@map("workflows")
+}
+
+model WorkflowStep {
+  id          String   @id @default(uuid())
+  workflow_id String
+  type        StepType
+  name        String
+  config      Json     // Step configuration
+  position    Int
+  created_at  DateTime @default(now())
+  
+  workflow    Workflow @relation(fields: [workflow_id], references: [id], onDelete: Cascade)
+  
+  @@index([workflow_id])
+  @@map("workflow_steps")
+}
+
+model Automation {
+  id            String   @id @default(uuid())
+  workflow_id   String   @unique
+  run_count     Int      @default(0)
+  last_run      DateTime?
+  success_rate  Float    @default(0)
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  
+  workflow      Workflow @relation(fields: [workflow_id], references: [id], onDelete: Cascade)
+  
+  @@map("automations")
+}
+
+model WorkflowRun {
+  id          String   @id @default(uuid())
+  workflow_id String
+  status      RunStatus @default(PENDING)
+  started_at  DateTime @default(now())
+  completed_at DateTime?
+  error       String?
+  logs        Json?
+  result      Json?
+  
+  workflow    Workflow @relation(fields: [workflow_id], references: [id], onDelete: Cascade)
+  
+  @@index([workflow_id])
+  @@index([status])
+  @@map("workflow_runs")
+}
+
+// ===== Document Models =====
+
+model Document {
+  id              String   @id @default(uuid())
+  workspace_id    String
+  user_id         String
+  name            String
+  type            String
+  content         String?
+  file_url        String?
+  processed_data  Json?
+  status          DocumentStatus @default(PENDING)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  
+  workspace       Workspace @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([workspace_id])
+  @@index([user_id])
+  @@index([status])
+  @@map("documents")
+}
+
+// ===== Integration Models =====
+
+model Integration {
+  id            String   @id @default(uuid())
+  workspace_id  String
+  provider      String   // slack, google, salesforce, etc.
+  name          String
+  config        Json
+  access_token  String?
+  refresh_token String?
+  is_active     Boolean  @default(true)
+  connected_at  DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  
+  workspace     Workspace @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  
+  @@index([workspace_id])
+  @@map("integrations")
+}
+
+model ApiKey {
+  id          String   @id @default(uuid())
+  user_id     String
+  key         String   @unique
+  name        String
+  permissions Json
+  last_used   DateTime?
+  created_at  DateTime @default(now())
+  expires_at  DateTime?
+  
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@map("api_keys")
+}
+
+// ===== Subscription & Billing Models =====
+
+model Subscription {
+  id                      String   @id @default(uuid())
+  user_id                 String
+  stripe_customer_id      String?  @unique
+  stripe_subscription_id  String?  @unique
+  plan_id                 String
+  status                  SubscriptionStatus @default(ACTIVE)
+  current_period_start    DateTime?
+  current_period_end      DateTime?
+  cancel_at_period_end    Boolean  @default(false)
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+  
+  user                    User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([stripe_customer_id])
+  @@map("subscriptions")
+}
+
+model Usage {
+  id                   String   @id @default(uuid())
+  user_id              String
+  workflow_runs        Int      @default(0)
+  documents_processed  Int      @default(0)
+  api_calls            Int      @default(0)
+  period_start         DateTime
+  period_end           DateTime
+  created_at           DateTime @default(now())
+  
+  user                 User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([period_start, period_end])
+  @@map("usage")
+}
+
+// ===== Existing Tables (Calendar/Booking) =====
+
+model EmailLead {
+  id         String   @id @default(uuid())
+  email      String
+  source     String   @default("landing_page")
+  status     String   @default("pending")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  @@map("email_leads")
+}
+
+model Booking {
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  phone      String?
+  service    String
+  date       DateTime
+  time       String
+  notes      String?
+  status     String   @default("pending")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  @@map("bookings")
+}
+
+model Availability {
+  id         String   @id @default(uuid())
+  day_of_week Int
+  start_time String
+  end_time   String
+  is_available Boolean @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  @@map("availability")
+}
+
+// ===== Audit & Security Models =====
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  user_id    String
+  action     String
+  entity_type String
+  entity_id  String?
+  metadata   Json?
+  ip_address String?
+  user_agent String?
+  created_at DateTime @default(now())
+  
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([entity_type, entity_id])
+  @@index([created_at])
+  @@map("audit_logs")
+}
+
+// ===== Enums =====
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum SubscriptionTier {
+  TRIAL
+  STARTER
+  PROFESSIONAL
+  BUSINESS
+  ENTERPRISE
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum WorkflowStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum StepType {
+  TRIGGER
+  ACTION
+  CONDITION
+  DELAY
+}
+
+enum RunStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  INCOMPLETE
+  TRIALING
+}
+
+

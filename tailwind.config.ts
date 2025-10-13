@@ -57,6 +57,12 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // CortexCloud custom colors
+        'cortex-cyan': 'hsl(var(--cortex-cyan))',
+        'cortex-purple': 'hsl(var(--cortex-purple))',
+        'cortex-blue-dark': 'hsl(var(--cortex-blue-dark))',
+        'cortex-blue-medium': 'hsl(var(--cortex-blue-medium))',
+        'cortex-blue-light': 'hsl(var(--cortex-blue-light))',
       },
       borderRadius: {
         lg: "var(--radius)",
