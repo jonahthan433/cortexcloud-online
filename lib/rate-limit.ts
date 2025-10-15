@@ -4,7 +4,15 @@ import { Redis } from '@upstash/redis';
 // Create a new ratelimiter that allows 10 requests per 10 seconds
 let ratelimit: Ratelimit | null = null;
 
-if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+// Check if Redis is properly configured (not placeholder values)
+const hasValidRedis = 
+  process.env.UPSTASH_REDIS_REST_URL && 
+  process.env.UPSTASH_REDIS_REST_TOKEN &&
+  !process.env.UPSTASH_REDIS_REST_URL.includes('your_') &&
+  !process.env.UPSTASH_REDIS_REST_TOKEN.includes('your_') &&
+  process.env.UPSTASH_REDIS_REST_URL.startsWith('https://');
+
+if (hasValidRedis) {
   const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL,
     token: process.env.UPSTASH_REDIS_REST_TOKEN,
@@ -42,10 +50,7 @@ export async function checkAPIRateLimit(identifier: string) {
   }
 
   const apiLimiter = new Ratelimit({
-    redis: new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL!,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-    }),
+    redis: ratelimit.redis,
     limiter: Ratelimit.slidingWindow(100, '1 h'),
     analytics: true,
   });
@@ -60,10 +65,7 @@ export async function checkAuthRateLimit(identifier: string) {
   }
 
   const authLimiter = new Ratelimit({
-    redis: new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL!,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-    }),
+    redis: ratelimit.redis,
     limiter: Ratelimit.slidingWindow(5, '15 m'),
     analytics: true,
   });

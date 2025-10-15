@@ -229,7 +229,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center justify-center pt-16 sm:pt-20 pb-8 sm:pb-10 px-4 sm:px-6">
+      <section className="min-h-screen flex items-center justify-center pt-4 sm:pt-8 pb-8 sm:pb-10 px-4 sm:px-6">
         <div className="container mx-auto text-center">
           <div className="max-w-5xl mx-auto">
             {/* Badge */}
@@ -423,10 +423,10 @@ export default function LandingPage() {
       <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6 gradient-text leading-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 gradient-text leading-tight">
               Frequently Asked Questions
             </h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
+            <p className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
               Everything you need to know about CortexCloud. Cannot find what you are looking for?{' '}
               <Link href="/contact" className="text-cortex-cyan hover:underline cursor-pointer ml-1">
                 Contact our support team
@@ -435,7 +435,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="bg-card/30 rounded-2xl border border-cortex-cyan/10 p-6">
+          <div className="bg-card/30 rounded-2xl border border-cortex-cyan/10 p-4 sm:p-6">
             <Accordion type="single" collapsible className="w-full">
               {faqs.map((faq, index) => (
                 <AccordionItem
@@ -443,29 +443,15 @@ export default function LandingPage() {
                   value={`item-${index}`}
                   className="border-cortex-cyan/10"
                 >
-                  <AccordionTrigger className="text-left text-foreground hover:text-cortex-cyan transition-colors">
+                  <AccordionTrigger className="text-left text-sm sm:text-base text-foreground hover:text-cortex-cyan transition-colors">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed">
+                  <AccordionContent className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                     {faq.answer}
                   </AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
-          </div>
-
-          <div className="text-center mt-12">
-            <p className="text-muted-foreground mb-4">
-              Still have questions? We are here to help!
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-gradient-primary hover:opacity-90" asChild>
-                <Link href="/contact">Contact Support</Link>
-              </Button>
-              <Button variant="outline" className="border-cortex-cyan/30 text-cortex-cyan hover:bg-cortex-cyan/10" asChild>
-                <Link href="/contact">Schedule Demo</Link>
-              </Button>
-            </div>
           </div>
         </div>
       </section>

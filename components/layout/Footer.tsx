@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Brain, Twitter, Github, Linkedin } from 'lucide-react';
+import Image from 'next/image';
+import { Twitter, Github, Linkedin } from 'lucide-react';
 
 export function Footer() {
   const navigation = {
@@ -48,9 +49,15 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div className="space-y-8">
-            <Link href="/" className="flex items-center">
-              <Brain className="h-8 w-8 text-primary" />
-              <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">
+            <Link href="/" className="flex items-center gap-2">
+              <Image 
+                src="/cortex-logo.jpg" 
+                alt="CortexCloud Logo" 
+                width={40} 
+                height={40}
+                className="rounded-lg"
+              />
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
                 CortexCloud
               </span>
             </Link>

@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -27,7 +28,6 @@ import {
   Settings,
   CreditCard,
   Plug,
-  Brain,
   Menu,
   X,
   ChevronLeft,
@@ -100,7 +100,13 @@ export default function DashboardLayout({
         <div className="flex h-16 items-center justify-between border-b px-4">
           {!sidebarCollapsed && (
             <Link href="/dashboard" className="flex items-center gap-2">
-              <Brain className="h-6 w-6 text-primary" />
+              <Image 
+                src="/cortex-logo.jpg" 
+                alt="CortexCloud" 
+                width={32} 
+                height={32}
+                className="rounded-lg"
+              />
               <span className="text-lg font-bold">CortexCloud</span>
             </Link>
           )}
@@ -194,7 +200,13 @@ export default function DashboardLayout({
           <aside className="absolute left-0 top-0 h-full w-64 border-r bg-white dark:bg-gray-950">
             <div className="flex h-16 items-center justify-between border-b px-4">
               <Link href="/dashboard" className="flex items-center gap-2">
-                <Brain className="h-6 w-6 text-primary" />
+                <Image 
+                  src="/cortex-logo.jpg" 
+                  alt="CortexCloud" 
+                  width={32} 
+                  height={32}
+                  className="rounded-lg"
+                />
                 <span className="text-lg font-bold">CortexCloud</span>
               </Link>
               <Button
@@ -243,7 +255,13 @@ export default function DashboardLayout({
             <Menu className="h-6 w-6" />
           </Button>
           <Link href="/dashboard" className="flex items-center gap-2">
-            <Brain className="h-6 w-6 text-primary" />
+            <Image 
+              src="/cortex-logo.jpg" 
+              alt="CortexCloud" 
+              width={32} 
+              height={32}
+              className="rounded-lg"
+            />
             <span className="text-lg font-bold">CortexCloud</span>
           </Link>
           <DropdownMenu>
