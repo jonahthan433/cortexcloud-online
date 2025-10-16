@@ -15,12 +15,13 @@ datasource db {
 // ===== Core User & Auth Models =====
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  avatar    String?
-  company   String?
-  role      UserRole @default(USER)
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password_hash String?  // Optional for OAuth users
+  name          String?
+  avatar        String?
+  company       String?
+  role          UserRole @default(USER)
   
   // Subscription & Trial
   subscription_tier  SubscriptionTier @default(TRIAL)

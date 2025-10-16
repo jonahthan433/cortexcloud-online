@@ -7,23 +7,24 @@ import bcrypt from 'bcryptjs';
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          prompt: 'consent',
-          access_type: 'offline',
-          response_type: 'code',
-          scope: 'openid email profile https://www.googleapis.com/auth/calendar',
-        },
-      },
-    }),
+    // Temporarily disabled until OAuth credentials are configured
+    // GoogleProvider({
+    //   clientId: process.env.GOOGLE_CLIENT_ID!,
+    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    //   authorization: {
+    //     params: {
+    //       prompt: 'consent',
+    //       access_type: 'offline',
+    //       response_type: 'code',
+    //       scope: 'openid email profile https://www.googleapis.com/auth/calendar',
+    //     },
+    //   },
+    // }),
     
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    }),
+    // GitHubProvider({
+    //   clientId: process.env.GITHUB_CLIENT_ID!,
+    //   clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    // }),
     
     CredentialsProvider({
       name: 'credentials',
@@ -42,16 +43,20 @@ export const authOptions: NextAuthOptions = {
           throw new Error('User not found');
         }
 
-        // Note: You'll need to add password_hash to User model or create separate auth table
-        // For now, this is a placeholder
-        // const isCorrectPassword = await bcrypt.compare(
-        //   credentials.password,
-        //   user.password_hash
-        // );
+        // Check if user has a password hash (credentials-based user)
+        if (!user.password_hash) {
+          throw new Error('Please sign in with OAuth provider');
+        }
 
-        // if (!isCorrectPassword) {
-        //   throw new Error('Invalid password');
-        // }
+        // Verify password
+        const isCorrectPassword = await bcrypt.compare(
+          credentials.password,
+          user.password_hash
+        );
+
+        if (!isCorrectPassword) {
+          throw new Error('Invalid password');
+        }
 
         return {
           id: user.id,
@@ -65,17 +70,18 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === 'google' || account?.provider === 'github') {
-        const existingUser = await getUserByEmail(user.email!);
-        
-        if (!existingUser) {
-          // Create new user
-          await createUser({
-            email: user.email!,
-            name: user.name || undefined,
-          });
-        }
-      }
+      // OAuth providers are currently disabled
+      // if (account?.provider === 'google' || account?.provider === 'github') {
+      //   const existingUser = await getUserByEmail(user.email!);
+      //   
+      //   if (!existingUser) {
+      //     // Create new user
+      //     await createUser({
+      //       email: user.email!,
+      //       name: user.name || undefined,
+      //     });
+      //   }
+      // }
       
       return true;
     },

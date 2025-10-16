@@ -2,15 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma, createUser, startTrial } from '@/lib/prisma';
 import { sendWelcomeEmail } from '@/lib/email';
 import { checkAuthRateLimit } from '@/lib/rate-limit';
+import { signupSchema, sanitizeEmail, sanitizeInput } from '@/lib/validation';
 import bcrypt from 'bcryptjs';
-import { z } from 'zod';
-
-const signupSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  company: z.string().optional(),
-});
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,9 +31,14 @@ export async function POST(request: NextRequest) {
 
     const { name, email, password, company } = validationResult.data;
 
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeEmail(email);
+    const sanitizedName = sanitizeInput(name);
+    const sanitizedCompany = company ? sanitizeInput(company) : undefined;
+
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: sanitizedEmail },
     });
 
     if (existingUser) {
@@ -53,18 +51,19 @@ export async function POST(request: NextRequest) {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
 
-    // Create user
+    // Create user with password hash
     const user = await createUser({
-      email,
-      name,
-      company,
+      email: sanitizedEmail,
+      name: sanitizedName,
+      company: sanitizedCompany,
+      password_hash: passwordHash,
     });
 
     // Start trial automatically
     await startTrial(user.id);
 
     // Send welcome email (don't wait for it)
-    sendWelcomeEmail(email, name).catch((error) =>
+    sendWelcomeEmail(sanitizedEmail, sanitizedName).catch((error) =>
       console.error('Failed to send welcome email:', error)
     );
 
