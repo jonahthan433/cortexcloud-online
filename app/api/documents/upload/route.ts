@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
+import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma, trackUsage, createAuditLog } from '@/lib/prisma';
 import { checkSubscriptionLimit } from '@/lib/rbac';
