@@ -1,7 +1,5 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import GoogleProvider from 'next-auth/providers/google';
-import GitHubProvider from 'next-auth/providers/github';
 import { prisma, getUserByEmail, createUser } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
@@ -87,16 +85,12 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
-      if (session?.user) {
-        const dbUser = await getUserByEmail(session.user.email!);
-        
-        if (dbUser) {
-          session.user.id = dbUser.id;
-          session.user.role = dbUser.role;
-          session.user.subscriptionTier = dbUser.subscription_tier;
-          session.user.trialStarted = dbUser.trial_started;
-          session.user.trialExpiresAt = dbUser.trial_expires_at?.toISOString();
-        }
+      if (session?.user && token) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.subscriptionTier = token.subscriptionTier as string;
+        session.user.trialStarted = token.trialStarted as boolean;
+        session.user.trialExpiresAt = token.trialExpiresAt as string;
       }
       
       return session;
@@ -105,6 +99,14 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
+        // Fetch user data to embed role and subscription tier
+        const dbUser = await getUserByEmail(user.email!);
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.subscriptionTier = dbUser.subscription_tier;
+          token.trialStarted = dbUser.trial_started;
+          token.trialExpiresAt = dbUser.trial_expires_at?.toISOString();
+        }
       }
       
       if (account) {
@@ -157,6 +159,10 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
+    role?: string;
+    subscriptionTier?: string;
+    trialStarted?: boolean;
+    trialExpiresAt?: string;
     accessToken?: string;
     refreshToken?: string;
   }

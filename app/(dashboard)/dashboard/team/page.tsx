@@ -24,7 +24,7 @@ export default function TeamPage() {
     toast.success('Opening invitation form...');
   };
 
-  const team members = [
+  const teamMembers = [
     {
       id: 1,
       name: 'John Doe',

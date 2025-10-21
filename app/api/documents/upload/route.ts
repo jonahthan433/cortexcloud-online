@@ -57,11 +57,25 @@ export async function POST(request: NextRequest) {
       const buffer = Buffer.from(bytes);
       const content = buffer.toString('utf-8');
 
+      // Get or create default workspace for user
+      let workspace = await prisma.workspace.findFirst({
+        where: { owner_id: session.user.id },
+      });
+      
+      if (!workspace) {
+        workspace = await prisma.workspace.create({
+          data: {
+            name: 'Default Workspace',
+            owner_id: session.user.id,
+          },
+        });
+      }
+
       // Create document record
       const document = await prisma.document.create({
         data: {
           user_id: session.user.id,
-          workspace_id: 'default-workspace-id', // Replace with actual workspace
+          workspace_id: workspace.id,
           name: file.name,
           type: file.type || 'application/octet-stream',
           content: content.substring(0, 10000), // Store first 10KB

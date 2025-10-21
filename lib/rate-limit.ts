@@ -50,7 +50,10 @@ export async function checkAPIRateLimit(identifier: string) {
   }
 
   const apiLimiter = new Ratelimit({
-    redis: ratelimit.redis,
+    redis: new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    }),
     limiter: Ratelimit.slidingWindow(100, '1 h'),
     analytics: true,
   });
@@ -65,7 +68,10 @@ export async function checkAuthRateLimit(identifier: string) {
   }
 
   const authLimiter = new Ratelimit({
-    redis: ratelimit.redis,
+    redis: new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    }),
     limiter: Ratelimit.slidingWindow(5, '15 m'),
     analytics: true,
   });

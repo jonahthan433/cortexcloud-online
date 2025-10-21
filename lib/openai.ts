@@ -1,13 +1,28 @@
 import OpenAI from 'openai';
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error('OPENAI_API_KEY is not set');
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openaiInstance) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY is not set');
+    }
+    openaiInstance = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      organization: process.env.OPENAI_ORG_ID,
+    });
+  }
+  return openaiInstance;
 }
 
-export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  organization: process.env.OPENAI_ORG_ID,
-});
+export const openai = {
+  get client() { return getOpenAI(); },
+  chat: {
+    completions: {
+      create: (params: any) => getOpenAI().chat.completions.create(params),
+    },
+  },
+};
 
 // Document text extraction
 export async function extractTextFromDocument(

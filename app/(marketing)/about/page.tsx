@@ -11,7 +11,7 @@ export default function AboutPage() {
   const values = [
     {
       name: 'Innovation',
-      description: 'We push the boundaries of what's possible with AI and automation',
+      description: 'We push the boundaries of what\'s possible with AI and automation',
       icon: Zap,
     },
     {
@@ -21,7 +21,7 @@ export default function AboutPage() {
     },
     {
       name: 'Simplicity',
-      description: 'Powerful doesn't have to mean complicated.',
+      description: 'Powerful doesn\'t have to mean complicated.',
       icon: Target,
     },
     {

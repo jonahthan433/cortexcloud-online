@@ -28,7 +28,7 @@ export default function ContactPage() {
       // In production, send to your email service or CRM
       await new Promise((resolve) => setTimeout(resolve, 1000));
       
-      toast.success('Message sent! We'll get back to you soon.');
+      toast.success('Message sent! We\'ll get back to you soon.');
       setFormData({
         name: '',
         email: '',
