@@ -10,6 +10,7 @@ const protectedRoutes = [
   '/api/team',
   '/api/billing',
   '/api/analytics',
+  '/api/admin',
 ];
 
 // Routes that are only for non-authenticated users
