@@ -104,7 +104,7 @@ export default function AdminDashboard() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
+      <div>
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <p className="text-gray-600">Manage users and view analytics</p>
         </div>
@@ -122,51 +122,51 @@ export default function AdminDashboard() {
       {/* Analytics Cards */}
       {analytics && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
               <div className="text-2xl font-bold">{analytics.totalUsers}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Recent Signups</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
+          </CardHeader>
+          <CardContent>
               <div className="text-2xl font-bold">{analytics.recentSignups}</div>
               <p className="text-xs text-muted-foreground">Last 7 days</p>
-            </CardContent>
-          </Card>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Trial Users</CardTitle>
               <Shield className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
+          </CardHeader>
+          <CardContent>
               <div className="text-2xl font-bold">
                 {users.filter(u => u.subscription_tier === 'TRIAL').length}
               </div>
-            </CardContent>
-          </Card>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Paid Users</CardTitle>
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
+          </CardHeader>
+          <CardContent>
               <div className="text-2xl font-bold">
                 {users.filter(u => u.subscription_tier !== 'TRIAL').length}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+          </CardContent>
+        </Card>
+      </div>
       )}
 
       {/* User Management */}
@@ -177,8 +177,8 @@ export default function AdminDashboard() {
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
-          <Card>
-            <CardHeader>
+      <Card>
+        <CardHeader>
               <CardTitle>All Users ({filteredUsers.length})</CardTitle>
               <div className="flex gap-4 mt-4">
                 <Input
@@ -201,8 +201,8 @@ export default function AdminDashboard() {
                   </SelectContent>
                 </Select>
               </div>
-            </CardHeader>
-            <CardContent>
+        </CardHeader>
+        <CardContent>
               <div className="space-y-4">
                 {filteredUsers.map((user) => (
                   <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
@@ -232,33 +232,33 @@ export default function AdminDashboard() {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+        </CardContent>
+      </Card>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
           {analytics && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
+        <Card>
+          <CardHeader>
                   <CardTitle>Subscription Breakdown</CardTitle>
-                </CardHeader>
+          </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     {analytics.subscriptionBreakdown.map((item) => (
                       <div key={item.subscription_tier} className="flex justify-between">
                         <span>{item.subscription_tier}</span>
                         <span className="font-semibold">{item.count}</span>
-                      </div>
+            </div>
                     ))}
-                  </div>
-                </CardContent>
-              </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-              <Card>
-                <CardHeader>
+        <Card>
+          <CardHeader>
                   <CardTitle>Monthly Growth</CardTitle>
-                </CardHeader>
+          </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     {analytics.monthlyGrowth.slice(0, 7).map((item) => (
@@ -268,9 +268,9 @@ export default function AdminDashboard() {
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+          </CardContent>
+        </Card>
+      </div>
           )}
         </TabsContent>
       </Tabs>
