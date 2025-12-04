@@ -42,39 +42,49 @@ export async function checkRateLimit(identifier: string): Promise<{
   return { success, limit, remaining, reset };
 }
 
+// Cache rate limiters to avoid creating new Redis instances
+let apiLimiter: Ratelimit | null = null;
+let authLimiter: Ratelimit | null = null;
+
 // Different rate limits for different operations
 export async function checkAPIRateLimit(identifier: string) {
   // More restrictive for API calls
-  if (!ratelimit) {
+  if (!hasValidRedis) {
     return { success: true };
   }
 
-  const apiLimiter = new Ratelimit({
-    redis: new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL!,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-    }),
-    limiter: Ratelimit.slidingWindow(100, '1 h'),
-    analytics: true,
-  });
+  if (!apiLimiter) {
+    apiLimiter = new Ratelimit({
+      redis: new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL!,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      }),
+      limiter: Ratelimit.slidingWindow(100, '1 h'),
+      analytics: true,
+      prefix: '@upstash/ratelimit/api',
+    });
+  }
 
   return await apiLimiter.limit(identifier);
 }
 
 export async function checkAuthRateLimit(identifier: string) {
   // Very restrictive for auth attempts
-  if (!ratelimit) {
+  if (!hasValidRedis) {
     return { success: true };
   }
 
-  const authLimiter = new Ratelimit({
-    redis: new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL!,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-    }),
-    limiter: Ratelimit.slidingWindow(5, '15 m'),
-    analytics: true,
-  });
+  if (!authLimiter) {
+    authLimiter = new Ratelimit({
+      redis: new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL!,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      }),
+      limiter: Ratelimit.slidingWindow(5, '15 m'),
+      analytics: true,
+      prefix: '@upstash/ratelimit/auth',
+    });
+  }
 
   return await authLimiter.limit(identifier);
 }

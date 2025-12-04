@@ -1,12 +1,13 @@
 import { create } from 'zustand';
+import type { WorkflowStep, WorkflowTrigger } from '@/lib/types/workflow';
 
 interface Workflow {
   id: string;
   name: string;
   description?: string;
   status: 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'ARCHIVED';
-  steps: any[];
-  triggers?: any;
+  steps: WorkflowStep[];
+  triggers?: WorkflowTrigger;
   is_active: boolean;
 }
 

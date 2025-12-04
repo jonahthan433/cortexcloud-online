@@ -1,9 +1,9 @@
-import { NextAuthOptions } from 'next-auth';
+import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { prisma, getUserByEmail, createUser } from '@/lib/prisma';
+import { getUserByEmail } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
-export const authOptions: NextAuthOptions = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     // Temporarily disabled until OAuth credentials are configured
     // GoogleProvider({
@@ -133,6 +133,11 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   
   debug: process.env.NODE_ENV === 'development',
+});
+
+// Export authOptions for backward compatibility with route handler
+export const authOptions = {
+  // Configuration is handled by NextAuth() call above
 };
 
 // Type augmentation for NextAuth

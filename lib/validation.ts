@@ -58,12 +58,27 @@ export const workspaceSchema = z.object({
   settings: z.record(z.any()).optional(),
 });
 
+// Workflow step schema
+const workflowStepSchema = z.object({
+  id: z.string().optional(),
+  type: z.enum(['TRIGGER', 'ACTION', 'CONDITION', 'DELAY']),
+  name: z.string().min(1, 'Step name is required'),
+  config: z.record(z.unknown()),
+  position: z.number().int().min(0).optional(),
+});
+
+// Workflow trigger schema
+const workflowTriggerSchema = z.object({
+  type: z.enum(['manual', 'schedule', 'webhook', 'event']),
+  config: z.record(z.unknown()),
+});
+
 // Workflow schemas
 export const workflowSchema = z.object({
   name: z.string().min(2, 'Workflow name must be at least 2 characters').max(100),
   description: z.string().max(500, 'Description must be less than 500 characters').optional(),
-  steps: z.array(z.any()),
-  triggers: z.record(z.any()).optional(),
+  steps: z.array(workflowStepSchema),
+  triggers: workflowTriggerSchema.optional(),
 });
 
 // Document schemas

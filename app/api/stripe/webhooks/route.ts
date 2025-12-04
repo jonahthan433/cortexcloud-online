@@ -50,7 +50,10 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        // Log unhandled events in development only
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Unhandled event type: ${event.type}`);
+        }
     }
 
     return NextResponse.json({ received: true });
@@ -144,13 +147,60 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
-  console.log(`Payment succeeded for invoice: ${invoice.id}`);
   // Send invoice email, update records, etc.
+  if (invoice.customer && typeof invoice.customer === 'string') {
+    const subscription = await prisma.subscription.findFirst({
+      where: { stripe_customer_id: invoice.customer },
+      include: { user: true },
+    });
+
+    if (subscription && invoice.hosted_invoice_url) {
+      const { sendInvoiceEmail } = await import('@/lib/email');
+      await sendInvoiceEmail(
+        subscription.user.email,
+        invoice.hosted_invoice_url,
+        invoice.amount_paid || 0,
+        `${new Date(invoice.period_start * 1000).toLocaleDateString()} - ${new Date(invoice.period_end * 1000).toLocaleDateString()}`
+      ).catch((error) => {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to send invoice email:', error);
+        }
+      });
+    }
+  }
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  console.log(`Payment failed for invoice: ${invoice.id}`);
   // Send failed payment notification
+  if (invoice.customer && typeof invoice.customer === 'string') {
+    const subscription = await prisma.subscription.findFirst({
+      where: { stripe_customer_id: invoice.customer },
+      include: { user: true },
+    });
+
+    if (subscription) {
+      const { sendEmail } = await import('@/lib/email');
+      await sendEmail({
+        to: subscription.user.email,
+        subject: 'Payment Failed - Action Required',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #ef4444;">Payment Failed</h1>
+            <p>We were unable to process your payment for your CortexCloud subscription.</p>
+            <p>Please update your payment method to continue using our service.</p>
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing" 
+               style="display: inline-block; background: #1e40af; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px;">
+              Update Payment Method
+            </a>
+          </div>
+        `,
+      }).catch((error) => {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to send payment failed email:', error);
+        }
+      });
+    }
+  }
 }
 
 
